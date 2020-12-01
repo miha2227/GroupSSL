@@ -20,6 +20,7 @@ class BasicBlock(nn.Module):
         self.convShortcut = (not self.equalInOut) and nn.Conv2d(in_planes, out_planes, kernel_size=1, stride=stride,
                                padding=0, bias=False) or None
         self.activate_before_residual = activate_before_residual
+
     def forward(self, x):
         if not self.equalInOut and self.activate_before_residual == True:
             x = self.relu1(self.bn1(x))
@@ -31,17 +32,21 @@ class BasicBlock(nn.Module):
         out = self.conv2(out)
         return torch.add(x if self.equalInOut else self.convShortcut(x), out)
 
+
 class NetworkBlock(nn.Module):
     def __init__(self, nb_layers, in_planes, out_planes, block, stride, dropRate=0.0, activate_before_residual=False):
         super(NetworkBlock, self).__init__()
         self.layer = self._make_layer(block, in_planes, out_planes, nb_layers, stride, dropRate, activate_before_residual)
+
     def _make_layer(self, block, in_planes, out_planes, nb_layers, stride, dropRate, activate_before_residual):
         layers = []
         for i in range(int(nb_layers)):
             layers.append(block(i == 0 and in_planes or out_planes, out_planes, i == 0 and stride or 1, dropRate, activate_before_residual))
         return nn.Sequential(*layers)
+
     def forward(self, x):
         return self.layer(x)
+
 
 class WideResNet(nn.Module):
     def __init__(self, num_classes, depth=28, widen_factor=2, dropRate=0.0):
@@ -84,4 +89,4 @@ class WideResNet(nn.Module):
         out = self.relu(self.bn1(out))
         out = F.avg_pool2d(out, 8)
         out = out.view(-1, self.nChannels)
-        return self.fc(out)
+        return self.fc(out), out  #probabilities and embeddings of NN

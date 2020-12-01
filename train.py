@@ -23,7 +23,10 @@ from progress.bar import Bar
 from utils import Logger, AverageMeter, accuracy, mkdir_p, savefig #Bar - not available in utils
 from tensorboardX import SummaryWriter
 
-parser = argparse.ArgumentParser(description='PyTorch MixMatch Training')
+from group_loss.gtg import GTG
+from utils.misc import get_labeled_and_unlabeled_points
+
+parser = argparse.ArgumentParser(description='PyTorch MixMatch with Group Loss Training')
 # Optimization options
 parser.add_argument('--epochs', default=1024, type=int, metavar='N',
                     help='number of total epochs to run')
@@ -52,6 +55,12 @@ parser.add_argument('--alpha', default=0.75, type=float)
 parser.add_argument('--lambda-u', default=75, type=float)
 parser.add_argument('--T', default=0.5, type=float)
 parser.add_argument('--ema-decay', default=0.999, type=float)
+
+# Group Loss options
+parser.add_argument('--num-labeled-per-class', type=int, default=2,
+                        help='Number of labeled samples per class for group loss')
+parser.add_argument('--T-softmax', type=float, default=10,
+                        help='Softmax temperature for group loss')
 
 
 args = parser.parse_args()
@@ -108,11 +117,16 @@ def main():
     model = create_model()
     ema_model = create_model(ema=True)
 
+    device='cuda:0'
+    nb_classes = 10 # number of classes in CIFAR-10 - move it to dataset class!
+    gtg = GTG(nb_classes, max_iter=args.num_labeled_per_class, device=device).to(device)
+
     cudnn.benchmark = True
     print('    Total params: %.2fM' % (sum(p.numel() for p in model.parameters())/1000000.0))
 
     train_criterion = SemiLoss()
-    criterion = nn.CrossEntropyLoss()
+    criterion_gl = nn.NLLLoss().to(device)
+    criterion = nn.CrossEntropyLoss().to(device)
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
     ema_optimizer= WeightEMA(model, ema_model, alpha=args.ema_decay)
@@ -144,7 +158,9 @@ def main():
 
         print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, args.epochs, state['lr']))
 
-        train_loss, train_loss_x, train_loss_u = train(labeled_trainloader, unlabeled_trainloader, model, optimizer, ema_optimizer, train_criterion, epoch, use_cuda)
+        train_loss, train_loss_x, train_loss_u = train(labeled_trainloader, unlabeled_trainloader,
+                                                       model, optimizer, ema_optimizer, train_criterion,
+                                                       gtg, criterion_gl, criterion, epoch, use_cuda)
         _, train_acc = validate(labeled_trainloader, ema_model, criterion, epoch, use_cuda, mode='Train Stats')
         val_loss, val_acc = validate(val_loader, ema_model, criterion, epoch, use_cuda, mode='Valid Stats')
         test_loss, test_acc = validate(test_loader, ema_model, criterion, epoch, use_cuda, mode='Test Stats ')
@@ -184,7 +200,10 @@ def main():
     print(np.mean(test_accs[-20:]))
 
 
-def train(labeled_trainloader, unlabeled_trainloader, model, optimizer, ema_optimizer, criterion, epoch, use_cuda):
+def train(labeled_trainloader, unlabeled_trainloader, model,
+          optimizer, ema_optimizer, criterion,
+          gtg, criterion_gl, loss_func,
+          epoch, use_cuda):
 
     batch_time = AverageMeter()
     data_time = AverageMeter()
@@ -201,7 +220,7 @@ def train(labeled_trainloader, unlabeled_trainloader, model, optimizer, ema_opti
     model.train()
     for batch_idx in range(args.train_iteration):
         try:
-            inputs_x, targets_x = labeled_train_iter.next()
+            inputs_x, targets_int = labeled_train_iter.next()
         except:
             labeled_train_iter = iter(labeled_trainloader)
             inputs_x, targets_x = labeled_train_iter.next()
@@ -218,31 +237,30 @@ def train(labeled_trainloader, unlabeled_trainloader, model, optimizer, ema_opti
         batch_size = inputs_x.size(0)
 
         # Transform label to one-hot
-        targets_x = torch.zeros(batch_size, 10).scatter_(1, targets_x.view(-1,1).long(), 1)
+        targets_x = torch.zeros(batch_size, 10).scatter_(1, targets_int.view(-1,1).long(), 1)
 
         if use_cuda:
-            inputs_x, targets_x = inputs_x.cuda(), targets_x.cuda(non_blocking=True)
+            #targets_int =  targets_int.cuda(non_blocking=True)
+            inputs_x, targets_x  = inputs_x.cuda(), targets_x.cuda(non_blocking=True)
             inputs_u = inputs_u.cuda()
             inputs_u2 = inputs_u2.cuda()
 
-
         with torch.no_grad():
-            # compute guessed labels of unlabel samples
-            outputs_u = model(inputs_u)
-            outputs_u2 = model(inputs_u2)
+            # compute guessed labels of unlabeled samples
+            outputs_u, _ = model(inputs_u)
+            outputs_u2, _ = model(inputs_u2)
             p = (torch.softmax(outputs_u, dim=1) + torch.softmax(outputs_u2, dim=1)) / 2
             pt = p**(1/args.T)
             targets_u = pt / pt.sum(dim=1, keepdim=True)
-            targets_u = targets_u.detach()
+            targets_u = targets_u.detach() #check how they look like
 
         # mixup
         all_inputs = torch.cat([inputs_x, inputs_u, inputs_u2], dim=0)
         all_targets = torch.cat([targets_x, targets_u, targets_u], dim=0)
 
         l = np.random.beta(args.alpha, args.alpha)
-
         l = max(l, 1-l)
-
+        # apply random permutation (shuffle the samples)
         idx = torch.randperm(all_inputs.size(0))
 
         input_a, input_b = all_inputs, all_inputs[idx]
@@ -251,20 +269,31 @@ def train(labeled_trainloader, unlabeled_trainloader, model, optimizer, ema_opti
         mixed_input = l * input_a + (1 - l) * input_b
         mixed_target = l * target_a + (1 - l) * target_b
 
-        # interleave labeled and unlabed samples between batches to get correct batchnorm calculation
+        # interleave labeled and unlabeled samples between batches to get correct batchnorm calculation
         mixed_input = list(torch.split(mixed_input, batch_size))
         mixed_input = interleave(mixed_input, batch_size)
 
-        logits = [model(mixed_input[0])]
+        model_out, model_embed = model(mixed_input[0])
+        logits = [model_out]
         for input in mixed_input[1:]:
-            logits.append(model(input))
+            model_out, _ = model(input)
+            logits.append(model_out)
 
         # put interleaved samples back
         logits = interleave(logits, batch_size)
-        logits_x = logits[0]
-        logits_u = torch.cat(logits[1:], dim=0)
+        logits_x = logits[0]  # logits for labeled samples
+        logits_u = torch.cat(logits[1:], dim=0)  # logits for unlabeled samples
 
-        Lx, Lu, w = criterion(logits_x, mixed_target[:batch_size], logits_u, mixed_target[batch_size:], epoch+batch_idx/args.train_iteration)
+        Lx, Lu, w = criterion(logits_x,
+                              mixed_target[:batch_size],
+                              targets_int,
+                              model_embed,
+                              gtg,
+                              criterion_gl,
+                              loss_func,
+                              logits_u,
+                              mixed_target[batch_size:],
+                              epoch+batch_idx/args.train_iteration)
 
         loss = Lx + w * Lu
 
@@ -302,6 +331,7 @@ def train(labeled_trainloader, unlabeled_trainloader, model, optimizer, ema_opti
 
     return (losses.avg, losses_x.avg, losses_u.avg,)
 
+
 def validate(valloader, model, criterion, epoch, use_cuda, mode):
 
     batch_time = AverageMeter()
@@ -323,7 +353,7 @@ def validate(valloader, model, criterion, epoch, use_cuda, mode):
             if use_cuda:
                 inputs, targets = inputs.cuda(), targets.cuda(non_blocking=True)
             # compute output
-            outputs = model(inputs)
+            outputs, _ = model(inputs)
             loss = criterion(outputs, targets)
 
             # measure accuracy and record loss
@@ -352,11 +382,13 @@ def validate(valloader, model, criterion, epoch, use_cuda, mode):
         bar.finish()
     return (losses.avg, top1.avg)
 
+
 def save_checkpoint(state, is_best, checkpoint=args.out, filename='checkpoint.pth.tar'):
     filepath = os.path.join(checkpoint, filename)
     torch.save(state, filepath)
     if is_best:
         shutil.copyfile(filepath, os.path.join(checkpoint, 'model_best.pth.tar'))
+
 
 def linear_rampup(current, rampup_length=args.epochs):
     if rampup_length == 0:
@@ -365,14 +397,57 @@ def linear_rampup(current, rampup_length=args.epochs):
         current = np.clip(current / rampup_length, 0.0, 1.0)
         return float(current)
 
-class SemiLoss(object):
-    def __call__(self, outputs_x, targets_x, outputs_u, targets_u, epoch):
-        probs_u = torch.softmax(outputs_u, dim=1)
 
-        Lx = -torch.mean(torch.sum(F.log_softmax(outputs_x, dim=1) * targets_x, dim=1))
+class SemiLoss(object):
+    def __call__(self,
+                 outputs_x,
+                 targets_x,
+                 orig_targets_x,
+                 model_embeddings,
+                 gtg,
+                 criterion_gl,
+                 loss_func,
+                 outputs_u,
+                 targets_u,
+                 epoch):
+
+        """
+        SemiLoss class which calculates Group Loss for labeled data
+        and L2 loss for unlabeled data
+
+        :param outputs_x:
+        :param targets_x: to get integer labels use torch.argmax(targets_x, dim=1)
+        :param orig_targets_x: as integers, and not one-hot encoded - can be omitted!
+        :param model_embeddings:
+        :param gtg: Group Loss
+        :param criterion_gl: Negative Log-Likelihood loss function for Group Loss
+        :param loss_func: Cross-Entropy loss
+        :param outputs_u:
+        :param targets_u:
+        :param epoch:
+        :return:
+        """
+
+        labs, L, U = get_labeled_and_unlabeled_points(orig_targets_x,
+                                                      num_points_per_class=args.num_labeled_per_class,
+                                                      num_classes=10)
+
+        # compute normalized softmax
+        probs_for_gtg = F.softmax(outputs_x / args.T_softmax, dim=1)
+
+        # do GTG (iterative process)
+        probs_for_gtg, W = gtg(model_embeddings, model_embeddings.shape[0], labs, L, U, probs_for_gtg)
+        probs_for_gtg = torch.log(probs_for_gtg + 1e-12)
+        orig_targets_x = orig_targets_x.cuda()
+        Lx = criterion_gl(probs_for_gtg, orig_targets_x) + loss_func(outputs_x, orig_targets_x)
+
+        #Lx = -torch.mean(torch.sum(F.log_softmax(outputs_x, dim=1) * targets_x, dim=1))
+
+        probs_u = torch.softmax(outputs_u, dim=1)
         Lu = torch.mean((probs_u - targets_u)**2)
 
         return Lx, Lu, args.lambda_u * linear_rampup(epoch)
+
 
 class WeightEMA(object):
     def __init__(self, model, ema_model, alpha=0.999):
@@ -395,6 +470,7 @@ class WeightEMA(object):
                 # customized weight decay
                 param.mul_(1 - self.wd)
 
+
 def interleave_offsets(batch, nu):
     groups = [batch // (nu + 1)] * (nu + 1)
     for x in range(batch - sum(groups)):
@@ -413,6 +489,7 @@ def interleave(xy, batch):
     for i in range(1, nu + 1):
         xy[0][i], xy[i][i] = xy[i][i], xy[0][i]
     return [torch.cat(v, dim=0) for v in xy]
+
 
 if __name__ == '__main__':
     main()

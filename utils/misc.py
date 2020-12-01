@@ -3,8 +3,10 @@
     - msr_init: net parameter initialization.
     - progress_bar: progress bar mimic xlua.progress.
 '''
+import torch
 import errno
 import os
+import numpy as np
 import sys
 import time
 import math
@@ -31,6 +33,7 @@ def get_mean_and_std(dataset):
     std.div_(len(dataset))
     return mean, std
 
+
 def init_params(net):
     '''Init layer parameters.'''
     for m in net.modules():
@@ -46,6 +49,7 @@ def init_params(net):
             if m.bias:
                 init.constant(m.bias, 0)
 
+
 def mkdir_p(path):
     '''make dir if not exist'''
     try:
@@ -55,6 +59,21 @@ def mkdir_p(path):
             pass
         else:
             raise
+
+
+def get_labeled_and_unlabeled_points(labels, num_points_per_class, num_classes=100):
+    labs, L, U = [], [], []
+    labs_buffer = np.zeros(num_classes)
+    num_points = labels.shape[0]
+    for i in range(num_points):
+        if labs_buffer[labels[i]] == num_points_per_class:
+            U.append(i)
+        else:
+            L.append(i)
+            labs.append(labels[i])
+            labs_buffer[labels[i]] += 1
+    return labs, L, U
+
 
 class AverageMeter(object):
     """Computes and stores the average and current value
