@@ -19,7 +19,8 @@ import torch.nn.functional as F
 
 import models.wideresnet as models
 import dataset.cifar10 as dataset
-from utils import Bar, Logger, AverageMeter, accuracy, mkdir_p, savefig
+from progress.bar import Bar
+from utils import Logger, AverageMeter, accuracy, mkdir_p, savefig #Bar - not available in utils
 from tensorboardX import SummaryWriter
 
 parser = argparse.ArgumentParser(description='PyTorch MixMatch Training')
@@ -96,7 +97,7 @@ def main():
 
     def create_model(ema=False):
         model = models.WideResNet(num_classes=10)
-        model = model.cuda()
+        model = model.cuda() if use_cuda else model
 
         if ema:
             for param in model.parameters():
@@ -250,7 +251,7 @@ def train(labeled_trainloader, unlabeled_trainloader, model, optimizer, ema_opti
         mixed_input = l * input_a + (1 - l) * input_b
         mixed_target = l * target_a + (1 - l) * target_b
 
-        # interleave labeled and unlabed samples between batches to get correct batchnorm calculation 
+        # interleave labeled and unlabed samples between batches to get correct batchnorm calculation
         mixed_input = list(torch.split(mixed_input, batch_size))
         mixed_input = interleave(mixed_input, batch_size)
 
