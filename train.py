@@ -20,7 +20,7 @@ import torch.nn.functional as F
 import models.wideresnet as models
 import dataset.cifar10 as dataset
 from progress.bar import Bar
-from utils import Logger, AverageMeter, accuracy, mkdir_p, savefig #Bar - not available in utils
+from utils import Logger, AverageMeter, accuracy, mkdir_p, savefig
 from tensorboardX import SummaryWriter
 
 from group_loss.gtg import GTG
@@ -62,6 +62,17 @@ parser.add_argument('--num-labeled-per-class', type=int, default=2,
 parser.add_argument('--T-softmax', type=float, default=10,
                         help='Softmax temperature for group loss')
 
+# TODO: 1. implement random search for next hyper parameters:
+#  - T-softmax
+#  - num-labeled-per-class (but here be careful because the more correct labels are provided the less info is left to learn
+#    by Group Loss
+#  - alpha (read MixMatch paper)
+#  - lambda-u (read MixMatch paper)
+#  - ema-decay (optional for tuning)
+
+# TODO: 2. It might happen that in Colab notebook the model learning can stop, due to overflow in the output.
+# That happened to me after 60 epochs of model training. If this is a case remove Bar outputs and print only
+# essential info (e.g. epoch, train, valid and test losses/accuracies on a single output line).
 
 args = parser.parse_args()
 state = {k: v for k, v in args._get_kwargs()}
