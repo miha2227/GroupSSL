@@ -232,7 +232,7 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
     model.train()
     for batch_idx in range(args.train_iteration):
         try:
-            inputs_x, targets_x = labeled_train_iter.next()
+            inputs_x, targets_int = labeled_train_iter.next()
         except:
             labeled_train_iter = iter(labeled_trainloader)
             inputs_x, targets_x = labeled_train_iter.next()
@@ -249,7 +249,7 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
         batch_size = inputs_x.size(0)
 
         # Transform label to one-hot
-        targets_x = torch.zeros(batch_size, 10).scatter_(1, targets_x.view(-1,1).long(), 1)
+        targets_x = torch.zeros(batch_size, 10).scatter_(1, targets_int.view(-1,1).long(), 1)
 
         if use_cuda:
             inputs_x, targets_x  = inputs_x.cuda(), targets_x.cuda(non_blocking=True)
@@ -297,6 +297,7 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
 
         Lx, Lu, w = criterion(logits_x,
                               mixed_target[:batch_size],
+                              targets_int,
                               model_embed,
                               gtg,
                               criterion_gl,
@@ -412,6 +413,7 @@ class SemiLoss(object):
     def __call__(self,
                  outputs_x,
                  targets_x,
+                 orig_targets_x,
                  model_embeddings,
                  gtg,
                  criterion_gl,
@@ -426,6 +428,7 @@ class SemiLoss(object):
 
         :param outputs_x:
         :param targets_x: to get integer labels use torch.argmax(targets_x, dim=1)
+        :param orig_targets_x: as integers, and not one-hot encoded - can be omitted!
         :param model_embeddings:
         :param gtg: Group Loss
         :param criterion_gl: Negative Log-Likelihood loss function for Group Loss
@@ -436,7 +439,6 @@ class SemiLoss(object):
         :return:
         """
 
-        orig_targets_x = torch.argmax(targets_x, dim=1)
         labs, L, U = get_labeled_and_unlabeled_points(orig_targets_x,
                                                       num_points_per_class=args.num_labeled_per_class,
                                                       num_classes=10)
