@@ -50,7 +50,7 @@ parser.add_argument('--n-labeled', type=int, default=250,
                     help='Number of labeled data')
 parser.add_argument('--train-iteration', type=int, default=1024,
                     help='Number of iteration per epoch')
-parser.add_argument('--out', default='result3_128_1024',
+parser.add_argument('--out', default='result',
                     help='Directory to output the result')
 parser.add_argument('--alpha', default=0.75, type=float)
 parser.add_argument('--lambda-u', default=75, type=float)
