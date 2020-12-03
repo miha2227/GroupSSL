@@ -26,6 +26,7 @@ from tensorboardX import SummaryWriter
 from group_loss.gtg import GTG
 from utils.misc import get_labeled_and_unlabeled_points
 
+# region: arguments
 parser = argparse.ArgumentParser(description='PyTorch MixMatch with Group Loss Training')
 # Optimization options
 parser.add_argument('--epochs', default=1024, type=int, metavar='N',
@@ -41,16 +42,16 @@ parser.add_argument('--resume', default='', type=str, metavar='PATH',
                     help='path to latest checkpoint (default: none)')
 # Miscs
 parser.add_argument('--manualSeed', type=int, default=0, help='manual seed')
-#Device options
+# Device options
 parser.add_argument('--gpu', default='0', type=str,
                     help='id(s) for CUDA_VISIBLE_DEVICES')
-#Method options
+# Method options
 parser.add_argument('--n-labeled', type=int, default=250,
-                        help='Number of labeled data')
+                    help='Number of labeled data')
 parser.add_argument('--train-iteration', type=int, default=1024,
-                        help='Number of iteration per epoch')
-parser.add_argument('--out', default='result',
-                        help='Directory to output the result')
+                    help='Number of iteration per epoch')
+parser.add_argument('--out', default='result3_128_1024',
+                    help='Directory to output the result')
 parser.add_argument('--alpha', default=0.75, type=float)
 parser.add_argument('--lambda-u', default=75, type=float)
 parser.add_argument('--T', default=0.5, type=float)
@@ -58,9 +59,10 @@ parser.add_argument('--ema-decay', default=0.999, type=float)
 
 # Group Loss options
 parser.add_argument('--num-labeled-per-class', type=int, default=2,
-                        help='Number of labeled samples per class for group loss')
+                    help='Number of labeled samples per class for group loss')
 parser.add_argument('--T-softmax', type=float, default=10,
-                        help='Softmax temperature for group loss')
+                    help='Softmax temperature for group loss')
+# endregion
 
 # TODO: 1. implement random search for next hyper parameters:
 #  - T-softmax
@@ -74,7 +76,7 @@ parser.add_argument('--T-softmax', type=float, default=10,
 # That happened to me after 60 epochs of model training. If this is a case remove Bar outputs and print only
 # essential info (e.g. epoch, train, valid and test losses/accuracies on a single output line).
 
-
+# region: setup
 args = parser.parse_args()
 state = {k: v for k, v in args._get_kwargs()}
 
@@ -88,6 +90,7 @@ if args.manualSeed is None:
 np.random.seed(args.manualSeed)
 
 best_acc = 0  # best test accuracy
+# endregion
 
 def main():
     global best_acc
@@ -107,9 +110,13 @@ def main():
         dataset.ToTensor(),
     ])
 
-    train_labeled_set, train_unlabeled_set, val_set, test_set = dataset.get_cifar10('./data', args.n_labeled, transform_train=transform_train, transform_val=transform_val)
-    labeled_trainloader = data.DataLoader(train_labeled_set, batch_size=args.batch_size, shuffle=True, num_workers=0, drop_last=True)
-    unlabeled_trainloader = data.DataLoader(train_unlabeled_set, batch_size=args.batch_size, shuffle=True, num_workers=0, drop_last=True)
+    train_labeled_set, train_unlabeled_set, val_set, test_set = dataset.get_cifar10('./data', args.n_labeled,
+                                                                                    transform_train=transform_train,
+                                                                                    transform_val=transform_val)
+    labeled_trainloader = data.DataLoader(train_labeled_set, batch_size=args.batch_size, shuffle=True, num_workers=0,
+                                          drop_last=True)
+    unlabeled_trainloader = data.DataLoader(train_unlabeled_set, batch_size=args.batch_size, shuffle=True,
+                                            num_workers=0, drop_last=True)
     val_loader = data.DataLoader(val_set, batch_size=args.batch_size, shuffle=False, num_workers=0)
     test_loader = data.DataLoader(test_set, batch_size=args.batch_size, shuffle=False, num_workers=0)
 
@@ -134,14 +141,14 @@ def main():
     gtg = GTG(nb_classes, max_iter=args.num_labeled_per_class, device=device).to(device)
 
     cudnn.benchmark = True
-    print('    Total params: %.2fM' % (sum(p.numel() for p in model.parameters())/1000000.0))
+    print('    Total params: %.2fM' % (sum(p.numel() for p in model.parameters()) / 1000000.0))
 
     train_criterion = SemiLoss()
     criterion_gl = nn.NLLLoss().to(device)
     criterion = nn.CrossEntropyLoss().to(device)
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
-    ema_optimizer= WeightEMA(model, ema_model, alpha=args.ema_decay)
+    ema_optimizer = WeightEMA(model, ema_model, alpha=args.ema_decay)
     start_epoch = 0
 
     # Resume
@@ -160,14 +167,14 @@ def main():
         logger = Logger(os.path.join(args.out, 'log.txt'), title=title, resume=True)
     else:
         logger = Logger(os.path.join(args.out, 'log.txt'), title=title)
-        logger.set_names(['Train Loss', 'Train Loss X', 'Train Loss U',  'Valid Loss', 'Valid Acc.', 'Test Loss', 'Test Acc.'])
+        logger.set_names(
+            ['Train Loss', 'Train Loss X', 'Train Loss U', 'Valid Loss', 'Valid Acc.', 'Test Loss', 'Test Acc.'])
 
     writer = SummaryWriter(args.out)
     step = 0
     test_accs = []
     # Train and val
     for epoch in range(start_epoch, args.epochs):
-
         print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, args.epochs, state['lr']))
 
         train_loss, train_loss_x, train_loss_u = train(labeled_trainloader, unlabeled_trainloader,
@@ -194,13 +201,13 @@ def main():
         is_best = val_acc > best_acc
         best_acc = max(val_acc, best_acc)
         save_checkpoint({
-                'epoch': epoch + 1,
-                'state_dict': model.state_dict(),
-                'ema_state_dict': ema_model.state_dict(),
-                'acc': val_acc,
-                'best_acc': best_acc,
-                'optimizer' : optimizer.state_dict(),
-            }, is_best)
+            'epoch': epoch + 1,
+            'state_dict': model.state_dict(),
+            'ema_state_dict': ema_model.state_dict(),
+            'acc': val_acc,
+            'best_acc': best_acc,
+            'optimizer': optimizer.state_dict(),
+        }, is_best)
         test_accs.append(test_acc)
     logger.close()
     writer.close()
@@ -216,7 +223,6 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
           optimizer, ema_optimizer, criterion,
           gtg, criterion_gl, loss_func,
           epoch, use_cuda):
-
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
@@ -249,10 +255,10 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
         batch_size = inputs_x.size(0)
 
         # Transform label to one-hot
-        targets_x = torch.zeros(batch_size, 10).scatter_(1, targets_int.view(-1,1).long(), 1)
+        targets_x = torch.zeros(batch_size, 10).scatter_(1, targets_int.view(-1, 1).long(), 1)
 
         if use_cuda:
-            inputs_x, targets_x  = inputs_x.cuda(), targets_x.cuda(non_blocking=True)
+            inputs_x, targets_x = inputs_x.cuda(), targets_x.cuda(non_blocking=True)
             inputs_u = inputs_u.cuda()
             inputs_u2 = inputs_u2.cuda()
 
@@ -261,16 +267,16 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
             outputs_u, _ = model(inputs_u)
             outputs_u2, _ = model(inputs_u2)
             p = (torch.softmax(outputs_u, dim=1) + torch.softmax(outputs_u2, dim=1)) / 2
-            pt = p**(1/args.T)
+            pt = p ** (1 / args.T)
             targets_u = pt / pt.sum(dim=1, keepdim=True)
-            targets_u = targets_u.detach() #check how they look like
+            targets_u = targets_u.detach()  # check how they look like
 
         # mixup
         all_inputs = torch.cat([inputs_x, inputs_u, inputs_u2], dim=0)
         all_targets = torch.cat([targets_x, targets_u, targets_u], dim=0)
 
         l = np.random.beta(args.alpha, args.alpha)
-        l = max(l, 1-l)
+        l = max(l, 1 - l)
         # apply random permutation (shuffle the samples)
         idx = torch.randperm(all_inputs.size(0))
 
@@ -304,7 +310,7 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
                               loss_func,
                               logits_u,
                               mixed_target[batch_size:],
-                              epoch+batch_idx/args.train_iteration)
+                              epoch + batch_idx / args.train_iteration)
 
         loss = Lx + w * Lu
 
@@ -325,18 +331,18 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
         end = time.time()
 
         # plot progress
-        bar.suffix  = '({batch}/{size}) Data: {data:.3f}s | Batch: {bt:.3f}s | Total: {total:} | ETA: {eta:} | Loss: {loss:.4f} | Loss_x: {loss_x:.4f} | Loss_u: {loss_u:.4f} | W: {w:.4f}'.format(
-                    batch=batch_idx + 1,
-                    size=args.train_iteration,
-                    data=data_time.avg,
-                    bt=batch_time.avg,
-                    total=bar.elapsed_td,
-                    eta=bar.eta_td,
-                    loss=losses.avg,
-                    loss_x=losses_x.avg,
-                    loss_u=losses_u.avg,
-                    w=ws.avg,
-                    )
+        bar.suffix = '({batch}/{size}) Data: {data:.3f}s | Batch: {bt:.3f}s | Total: {total:} | ETA: {eta:} | Loss: {loss:.4f} | Loss_x: {loss_x:.4f} | Loss_u: {loss_u:.4f} | W: {w:.4f}'.format(
+            batch=batch_idx + 1,
+            size=args.train_iteration,
+            data=data_time.avg,
+            bt=batch_time.avg,
+            total=bar.elapsed_td,
+            eta=bar.eta_td,
+            loss=losses.avg,
+            loss_x=losses_x.avg,
+            loss_u=losses_u.avg,
+            w=ws.avg,
+        )
         bar.next()
     bar.finish()
 
@@ -344,7 +350,6 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
 
 
 def validate(valloader, model, criterion, epoch, use_cuda, mode):
-
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
@@ -365,7 +370,7 @@ def validate(valloader, model, criterion, epoch, use_cuda, mode):
                 inputs, targets = inputs.cuda(), targets.cuda(non_blocking=True)
             # compute output
             outputs, _ = model(inputs)
-            loss = criterion(outputs, targets)
+            loss = criterion(outputs, targets.long())  # datatype issue: int vs long
 
             # measure accuracy and record loss
             prec1, prec5 = accuracy(outputs, targets, topk=(1, 5))
@@ -378,17 +383,17 @@ def validate(valloader, model, criterion, epoch, use_cuda, mode):
             end = time.time()
 
             # plot progress
-            bar.suffix  = '({batch}/{size}) Data: {data:.3f}s | Batch: {bt:.3f}s | Total: {total:} | ETA: {eta:} | Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f}'.format(
-                        batch=batch_idx + 1,
-                        size=len(valloader),
-                        data=data_time.avg,
-                        bt=batch_time.avg,
-                        total=bar.elapsed_td,
-                        eta=bar.eta_td,
-                        loss=losses.avg,
-                        top1=top1.avg,
-                        top5=top5.avg,
-                        )
+            bar.suffix = '({batch}/{size}) Data: {data:.3f}s | Batch: {bt:.3f}s | Total: {total:} | ETA: {eta:} | Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f}'.format(
+                batch=batch_idx + 1,
+                size=len(valloader),
+                data=data_time.avg,
+                bt=batch_time.avg,
+                total=bar.elapsed_td,
+                eta=bar.eta_td,
+                loss=losses.avg,
+                top1=top1.avg,
+                top5=top5.avg,
+            )
             bar.next()
         bar.finish()
     return (losses.avg, top1.avg)
@@ -421,7 +426,6 @@ class SemiLoss(object):
                  outputs_u,
                  targets_u,
                  epoch):
-
         """
         SemiLoss class which calculates Group Loss for labeled data
         and L2 loss for unlabeled data
@@ -450,12 +454,12 @@ class SemiLoss(object):
         probs_for_gtg, W = gtg(model_embeddings, model_embeddings.shape[0], labs, L, U, probs_for_gtg)
         probs_for_gtg = torch.log(probs_for_gtg + 1e-12)
         orig_targets_x = orig_targets_x.cuda()
-        Lx = criterion_gl(probs_for_gtg, orig_targets_x) + loss_func(outputs_x, orig_targets_x)
+        Lx = criterion_gl(probs_for_gtg, orig_targets_x.long()) + loss_func(outputs_x, orig_targets_x.long())  #long: datatype issue
 
-        #Lx = -torch.mean(torch.sum(F.log_softmax(outputs_x, dim=1) * targets_x, dim=1))
+        # Lx = -torch.mean(torch.sum(F.log_softmax(outputs_x, dim=1) * targets_x, dim=1))
 
         probs_u = torch.softmax(outputs_u, dim=1)
-        Lu = torch.mean((probs_u - targets_u)**2)
+        Lu = torch.mean((probs_u - targets_u) ** 2)
 
         return Lx, Lu, args.lambda_u * linear_rampup(epoch)
 
@@ -475,7 +479,7 @@ class WeightEMA(object):
     def step(self):
         one_minus_alpha = 1.0 - self.alpha
         for param, ema_param in zip(self.params, self.ema_params):
-            if ema_param.dtype==torch.float32:
+            if ema_param.dtype == torch.float32:
                 ema_param.mul_(self.alpha)
                 ema_param.add_(param * one_minus_alpha)
                 # customized weight decay
