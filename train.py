@@ -26,58 +26,64 @@ from tensorboardX import SummaryWriter
 from group_loss.gtg import GTG
 from utils.misc import get_labeled_and_unlabeled_points
 
-# region: arguments
-parser = argparse.ArgumentParser(description='PyTorch MixMatch with Group Loss Training')
-# Optimization options
-parser.add_argument('--epochs', default=1024, type=int, metavar='N',
-                    help='number of total epochs to run')
-parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
-                    help='manual epoch number (useful on restarts)')
-parser.add_argument('--batch-size', default=64, type=int, metavar='N',
-                    help='train batchsize')
-parser.add_argument('--lr', '--learning-rate', default=0.002, type=float,
-                    metavar='LR', help='initial learning rate')
-# Checkpoints
-parser.add_argument('--resume', default='', type=str, metavar='PATH',
-                    help='path to latest checkpoint (default: none)')
-# Miscs
-parser.add_argument('--manualSeed', type=int, default=0, help='manual seed')
-# Device options
-parser.add_argument('--gpu', default='0', type=str,
-                    help='id(s) for CUDA_VISIBLE_DEVICES')
-# Method options
-parser.add_argument('--n-labeled', type=int, default=250,
-                    help='Number of labeled data')
-parser.add_argument('--train-iteration', type=int, default=1024,
-                    help='Number of iteration per epoch')
-parser.add_argument('--out', default='result3_128_1024',
-                    help='Directory to output the result')
-parser.add_argument('--alpha', default=0.75, type=float)
-parser.add_argument('--lambda-u', default=75, type=float)
-parser.add_argument('--T', default=0.5, type=float)
-parser.add_argument('--ema-decay', default=0.999, type=float)
 
-# Group Loss options
-parser.add_argument('--num-labeled-per-class', type=int, default=2,
-                    help='Number of labeled samples per class for group loss')
-parser.add_argument('--T-softmax', type=float, default=10,
-                    help='Softmax temperature for group loss')
-# endregion
+def args_setup():
+    # region: arguments
+    parser = argparse.ArgumentParser(description='PyTorch MixMatch with Group Loss Training')
+    # Optimization options
+    parser.add_argument('--epochs', default=1024, type=int, metavar='N',
+                        help='number of total epochs to run')
+    parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
+                        help='manual epoch number (useful on restarts)')
+    parser.add_argument('--batch-size', default=64, type=int, metavar='N',
+                        help='train batchsize')
+    parser.add_argument('--lr', '--learning-rate', default=0.002, type=float,
+                        metavar='LR', help='initial learning rate')
+    # Checkpoints
+    parser.add_argument('--resume', default='', type=str, metavar='PATH',
+                        help='path to latest checkpoint (default: none)')
+    # Miscs
+    parser.add_argument('--manualSeed', type=int, default=0, help='manual seed')
+    # Device options
+    parser.add_argument('--gpu', default='0', type=str,
+                        help='id(s) for CUDA_VISIBLE_DEVICES')
+    # Method options
+    parser.add_argument('--n-labeled', type=int, default=250,
+                        help='Number of labeled data')
+    parser.add_argument('--train-iteration', type=int, default=1024,
+                        help='Number of iteration per epoch')
+    parser.add_argument('--out', default='result',
+                        help='Directory to output the result')
+    parser.add_argument('--alpha', default=0.75, type=float)
+    parser.add_argument('--lambda-u', default=75, type=float)
+    parser.add_argument('--T', default=0.5, type=float)
+    parser.add_argument('--ema-decay', default=0.999, type=float)
 
-# TODO: 1. implement random search for next hyper parameters:
-#  - T-softmax
-#  - num-labeled-per-class (but here be careful because the more correct labels are provided the less info is left to learn
-#    by Group Loss
-#  - alpha (read MixMatch paper)
-#  - lambda-u (read MixMatch paper)
-#  - ema-decay (optional for tuning)
+    # Group Loss options
+    parser.add_argument('--num-labeled-per-class', type=int, default=2,
+                        help='Number of labeled samples per class for group loss')
+    parser.add_argument('--T-softmax', type=float, default=10,
+                        help='Softmax temperature for group loss')
+    # endregion
 
-# TODO: 2. It might happen that in Colab notebook the model learning can stop, due to overflow in the output.
-# That happened to me after 60 epochs of model training. If this is a case remove Bar outputs and print only
-# essential info (e.g. epoch, train, valid and test losses/accuracies on a single output line).
+    # TODO: 1. implement random search for next hyper parameters:
+    #  - T-softmax
+    #  - num-labeled-per-class (but here be careful because the more correct labels are provided the less info is left to learn
+    #    by Group Loss
+    #  - alpha (read MixMatch paper)
+    #  - lambda-u (read MixMatch paper)
+    #  - ema-decay (optional for tuning)
 
-# region: setup
-args = parser.parse_args()
+    # TODO: 2. It might happen that in Colab notebook the model learning can stop, due to overflow in the output.
+    # That happened to me after 60 epochs of model training. If this is a case remove Bar outputs and print only
+    # essential info (e.g. epoch, train, valid and test losses/accuracies on a single output line).
+
+    # region: setup
+    args = parser.parse_args()
+    return args
+
+
+args = args_setup()
 state = {k: v for k, v in args._get_kwargs()}
 
 # Use CUDA
@@ -90,9 +96,11 @@ if args.manualSeed is None:
 np.random.seed(args.manualSeed)
 
 best_acc = 0  # best test accuracy
+
+
 # endregion
 
-def main():
+def main(args=args, use_cuda=use_cuda):
     global best_acc
 
     if not os.path.isdir(args.out):
@@ -136,14 +144,14 @@ def main():
     model = create_model()
     ema_model = create_model(ema=True)
 
-    device='cuda:0'
-    nb_classes = 10 # number of classes in CIFAR-10 - move it to dataset class!
+    device = 'cuda:0'
+    nb_classes = 10  # number of classes in CIFAR-10 - move it to dataset class!
     gtg = GTG(nb_classes, max_iter=args.num_labeled_per_class, device=device).to(device)
 
     cudnn.benchmark = True
     print('    Total params: %.2fM' % (sum(p.numel() for p in model.parameters()) / 1000000.0))
 
-    train_criterion = SemiLoss()
+    train_criterion = SemiLoss(args=args)
     criterion_gl = nn.NLLLoss().to(device)
     criterion = nn.CrossEntropyLoss().to(device)
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
@@ -179,7 +187,7 @@ def main():
 
         train_loss, train_loss_x, train_loss_u = train(labeled_trainloader, unlabeled_trainloader,
                                                        model, optimizer, ema_optimizer, train_criterion,
-                                                       gtg, criterion_gl, criterion, epoch, use_cuda)
+                                                       gtg, criterion_gl, criterion, epoch, use_cuda, args=args)
         _, train_acc = validate(labeled_trainloader, ema_model, criterion, epoch, use_cuda, mode='Train Stats')
         val_loss, val_acc = validate(val_loader, ema_model, criterion, epoch, use_cuda, mode='Valid Stats')
         test_loss, test_acc = validate(test_loader, ema_model, criterion, epoch, use_cuda, mode='Test Stats ')
@@ -222,7 +230,7 @@ def main():
 def train(labeled_trainloader, unlabeled_trainloader, model,
           optimizer, ema_optimizer, criterion,
           gtg, criterion_gl, loss_func,
-          epoch, use_cuda):
+          epoch, use_cuda, args=args):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
@@ -415,6 +423,9 @@ def linear_rampup(current, rampup_length=args.epochs):
 
 
 class SemiLoss(object):
+    def __init__(self, args):
+        super().__init__()
+        self.args = args
     def __call__(self,
                  outputs_x,
                  targets_x,
@@ -425,7 +436,8 @@ class SemiLoss(object):
                  loss_func,
                  outputs_u,
                  targets_u,
-                 epoch):
+                 epoch,
+                 ):
         """
         SemiLoss class which calculates Group Loss for labeled data
         and L2 loss for unlabeled data
@@ -442,7 +454,7 @@ class SemiLoss(object):
         :param epoch:
         :return:
         """
-
+        args = self.args
         labs, L, U = get_labeled_and_unlabeled_points(orig_targets_x,
                                                       num_points_per_class=args.num_labeled_per_class,
                                                       num_classes=10)
@@ -454,7 +466,8 @@ class SemiLoss(object):
         probs_for_gtg, W = gtg(model_embeddings, model_embeddings.shape[0], labs, L, U, probs_for_gtg)
         probs_for_gtg = torch.log(probs_for_gtg + 1e-12)
         orig_targets_x = orig_targets_x.cuda()
-        Lx = criterion_gl(probs_for_gtg, orig_targets_x.long()) + loss_func(outputs_x, orig_targets_x.long())  #long: datatype issue
+        Lx = criterion_gl(probs_for_gtg, orig_targets_x.long()) + loss_func(outputs_x,
+                                                                            orig_targets_x.long())  # long: datatype issue
 
         # Lx = -torch.mean(torch.sum(F.log_softmax(outputs_x, dim=1) * targets_x, dim=1))
 
@@ -465,7 +478,7 @@ class SemiLoss(object):
 
 
 class WeightEMA(object):
-    def __init__(self, model, ema_model, alpha=0.999):
+    def __init__(self, model, ema_model, alpha=0.999, args=args):
         self.model = model
         self.ema_model = ema_model
         self.alpha = alpha
