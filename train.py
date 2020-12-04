@@ -80,6 +80,8 @@ def args_setup():
 
     # region: setup
     args = parser.parse_args()
+    if args.manualSeed is None:
+        args.manualSeed = random.randint(1, 10000)
     return args
 
 
@@ -90,19 +92,27 @@ state = {k: v for k, v in args._get_kwargs()}
 os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
 use_cuda = torch.cuda.is_available()
 
-# Random seed
-if args.manualSeed is None:
-    args.manualSeed = random.randint(1, 10000)
-np.random.seed(args.manualSeed)
+
 
 best_acc = 0  # best test accuracy
 
 
 # endregion
 
+def create_model(use_cuda=use_cuda, ema=False):
+    model = models.WideResNet(num_classes=10)
+    model = model.cuda() if use_cuda else model
+
+    if ema:
+        for param in model.parameters():
+            param.detach_()
+
+    return model
+
 def main(args=args, use_cuda=use_cuda):
     global best_acc
-
+    # Random seed
+    np.random.seed(args.manualSeed)
     if not os.path.isdir(args.out):
         mkdir_p(args.out)
 
@@ -131,15 +141,7 @@ def main(args=args, use_cuda=use_cuda):
     # Model
     print("==> creating WRN-28-2")
 
-    def create_model(ema=False):
-        model = models.WideResNet(num_classes=10)
-        model = model.cuda() if use_cuda else model
 
-        if ema:
-            for param in model.parameters():
-                param.detach_()
-
-        return model
 
     model = create_model()
     ema_model = create_model(ema=True)
@@ -181,9 +183,10 @@ def main(args=args, use_cuda=use_cuda):
     writer = SummaryWriter(args.out)
     step = 0
     test_accs = []
+    val_accs = []
     # Train and val
     for epoch in range(start_epoch, args.epochs):
-        print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, args.epochs, state['lr']))
+        print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, args.epochs, args.lr))
 
         train_loss, train_loss_x, train_loss_u = train(labeled_trainloader, unlabeled_trainloader,
                                                        model, optimizer, ema_optimizer, train_criterion,
@@ -217,14 +220,16 @@ def main(args=args, use_cuda=use_cuda):
             'optimizer': optimizer.state_dict(),
         }, is_best)
         test_accs.append(test_acc)
+        val_accs.append(val_acc)
     logger.close()
     writer.close()
 
-    print('Best acc:')
-    print(best_acc)
-
-    print('Mean acc:')
-    print(np.mean(test_accs[-20:]))
+    print('Best acc: {}'.format(best_acc))
+    mean_val_acc = np.mean(val_accs[-20:])
+    mean_test_acc = np.mean(test_accs[-20:])
+    print('Mean val acc: {}'.format(mean_val_acc))
+    print('Mean test acc: {}'.format(mean_test_acc))
+    return best_acc, mean_val_acc, mean_test_acc
 
 
 def train(labeled_trainloader, unlabeled_trainloader, model,

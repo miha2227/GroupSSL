@@ -1,7 +1,6 @@
 import random
 from math import log10
 from itertools import product
-from solver import Solver
 import dataset.cifar10 as dataset
 import torch.utils.data as data
 import torchvision.transforms as transforms
@@ -11,21 +10,22 @@ from group_loss.gtg import GTG
 import torch.nn as nn
 import torch.optim as optim
 from train import SemiLoss, WeightEMA
-
+import time
+import json
+from train import create_model, args_setup, main
 
 ALLOWED_RANDOM_SEARCH_PARAMS = ['log', 'int', 'float', 'item']
 
 
-def random_search(train_loader, val_loader, model_class,
-                  random_search_spaces={
-                      "T_softmax": ([10.0, 20.0], "float"),
-                      "num_labeled_per_class": ([1, 5], "int"),
-                      "alpha": ([0.0, 1.0], "float"),
-                      "lambda_u": ([70.0, 80.0], "float"),
-                      "ema_decay": ([0.8, 1.0], "float"),
-                  },
-                  num_search=20, epochs=20,
-                  patience=5):
+def random_search(random_search_spaces={
+    "T_softmax": ([1, 100], "int"),
+    "num_labeled_per_class": ([1, 3], "int"),
+    "alpha": ([0.5, 0.99], "float"),
+    "lambda_u": ([75, 100], "int"),
+    "lr": ([1e-5, 0.1], "float"),
+},
+        num_search=20, epochs=20,
+        patience=5):
     """
     Samples N_SEARCH hyper parameter sets within the provided search spaces
     and returns the best model.
@@ -40,12 +40,10 @@ def random_search(train_loader, val_loader, model_class,
     for _ in range(num_search):
         configs.append(random_search_spaces_to_config(random_search_spaces))
 
-    return findBestConfig(train_loader, val_loader, configs, epochs, patience,
-                          model_class)
+    return findBestConfig(configs, epochs)
 
 
-def findBestConfig(train_loader, val_loader, configs, EPOCHS, PATIENCE,
-                   model_class):
+def findBestConfig(configs, epochs):
     """
     Get a list of hyperparameter configs for random search or grid search,
     trains a model on all configs and returns the one performing best
@@ -54,25 +52,41 @@ def findBestConfig(train_loader, val_loader, configs, EPOCHS, PATIENCE,
 
     best_val = None
     best_config = None
+    best_config_id = None
     best_model = None
     results = []
 
+    args = args_setup()
+
+    args.epochs = epochs
+    start = time.time()
     for i in range(len(configs)):
         print("\nEvaluating Config #{} [of {}]:\n".format(
             (i + 1), len(configs)), configs[i])
+        args.out = 'random_search_op/Random_Search_{}_epochs_Configuration_{}'.format(epochs, i)
+        args.T_softmax = configs[i]['T_softmax']
+        args.num_labeled_per_class = configs[i]['num_labeled_per_class']
+        args.alpha = configs[i]['alpha']
+        args.lambda_u = configs[i]['lambda_u']
+        args.lr = configs[i]['lr']
 
-        model = model_class(**configs[i])
-        solver = Solver(model, train_loader, val_loader, **configs[i])
-        solver.train(epochs=EPOCHS, patience=PATIENCE)
-        results.append(solver.best_model_stats)
+        b_v_acc, m_v_acc, m_t_acc = main(args=args, use_cuda=True)
+        results.append(m_v_acc)
 
-        if not best_val or solver.best_model_stats["val_loss"] < best_val:
-            best_val, best_model, \
-            best_config = solver.best_model_stats["val_loss"], model, configs[i]
+        if not best_val or max(results) > best_val:  # judged based on mean validation accuracy
+            best_val, best_config, best_config_id = max(results), configs[i], i+1
+    time_taken = time.time() - start
+    with open('random_search_log.txt', 'a') as f:
+        f.write('Search completed for {} configurations with {} epochs for each'.format(len(configs), epochs))
+        f.write('\nTotal tine taken: {} seconds'.format(time_taken))
+        f.write('\nBest Config_id: {}'.format(best_config_id))
+        f.write('\nBest Configuration Details: \n')
+        f.write(json.dumps(best_config))
 
-    print("\nSearch done. Best Val Loss = {}".format(best_val))
-    print("Best Config:", best_config)
-    return best_model, list(zip(configs, results))
+    print("\nSearch done. Best avg test accuracy = {}".format(best_val))
+    print("Best Config_id:", best_config_id)
+    print('Best config: ', best_config)
+    return best_config, list(zip(configs, results))
 
 
 def random_search_spaces_to_config(random_search_spaces):
@@ -105,51 +119,5 @@ def random_search_spaces_to_config(random_search_spaces):
     return config
 
 
-# def setup_util(n_labeled, batch_size, adam_lr, ema_decay, num_labeled_per_class, alpha, lambda_u, T_Softmax, use_cuda=True):
-#     transform_train = transforms.Compose([
-#         dataset.RandomPadandCrop(32),
-#         dataset.RandomFlip(),
-#         dataset.ToTensor(),
-#     ])
-#
-#     transform_val = transforms.Compose([
-#         dataset.ToTensor(),
-#     ])
-#
-#     train_labeled_set, train_unlabeled_set, val_set, test_set = dataset.get_cifar10('./data', n_labeled,
-#                                                                                     transform_train=transform_train,
-#                                                                                     transform_val=transform_val)
-#     labeled_trainloader = data.DataLoader(train_labeled_set, batch_size=batch_size, shuffle=True, num_workers=0,
-#                                           drop_last=True)
-#     unlabeled_trainloader = data.DataLoader(train_unlabeled_set, batch_size=batch_size, shuffle=True,
-#                                             num_workers=0, drop_last=True)
-#     val_loader = data.DataLoader(val_set, batch_size=batch_size, shuffle=False, num_workers=0)
-#     test_loader = data.DataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers=0)
-#
-#     def create_model(ema=False):
-#         model = models.WideResNet(num_classes=10)
-#         model = model.cuda() if use_cuda else model
-#
-#         if ema:
-#             for param in model.parameters():
-#                 param.detach_()
-#
-#         return model
-#
-#     model = create_model()
-#     ema_model = create_model(ema=True)
-#
-#     device = 'cuda:0'
-#     nb_classes = 10  # number of classes in CIFAR-10 - move it to dataset class!
-#     gtg = GTG(nb_classes, max_iter=num_labeled_per_class, device=device).to(device)
-#
-#     cudnn.benchmark = True
-#     print('    Total params: %.2fM' % (sum(p.numel() for p in model.parameters()) / 1000000.0))
-#
-#     train_criterion = SemiLoss()
-#     criterion_gl = nn.NLLLoss().to(device)
-#     criterion = nn.CrossEntropyLoss().to(device)
-#     optimizer = optim.Adam(model.parameters(), lr=adam_lr)
-#
-#     ema_optimizer = WeightEMA(model, ema_model, alpha=ema_decay)
-#     start_epoch = 0
+if __name__ == '__main__':
+    random_search()
