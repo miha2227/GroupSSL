@@ -85,21 +85,16 @@ def args_setup():
     return args
 
 
-args = args_setup()
-state = {k: v for k, v in args._get_kwargs()}
+#args = args_setup()
+#state = {k: v for k, v in args._get_kwargs()}
 
 # Use CUDA
-os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
-use_cuda = torch.cuda.is_available()
-
-
-
-best_acc = 0  # best test accuracy
+#os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
+#use_cuda = torch.cuda.is_available()
 
 
 # endregion
-
-def create_model(use_cuda=use_cuda, ema=False):
+def create_model(use_cuda, ema=False):
     model = models.WideResNet(num_classes=10)
     model = model.cuda() if use_cuda else model
 
@@ -109,8 +104,12 @@ def create_model(use_cuda=use_cuda, ema=False):
 
     return model
 
-def main(args=args, use_cuda=use_cuda):
-    global best_acc
+
+def main(args, use_cuda):
+    state = {k: v for k, v in args._get_kwargs()}
+
+    #global best_acc
+    best_acc = 0  # best test accuracy
     # Random seed
     np.random.seed(args.manualSeed)
     if not os.path.isdir(args.out):
@@ -141,10 +140,8 @@ def main(args=args, use_cuda=use_cuda):
     # Model
     print("==> creating WRN-28-2")
 
-
-
-    model = create_model()
-    ema_model = create_model(ema=True)
+    model = create_model(use_cuda)
+    ema_model = create_model(use_cuda, ema=True)
 
     device = 'cuda:0'
     nb_classes = 10  # number of classes in CIFAR-10 - move it to dataset class!
@@ -158,7 +155,7 @@ def main(args=args, use_cuda=use_cuda):
     criterion = nn.CrossEntropyLoss().to(device)
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
 
-    ema_optimizer = WeightEMA(model, ema_model, alpha=args.ema_decay)
+    ema_optimizer = WeightEMA(model, ema_model, args, alpha=args.ema_decay)
     start_epoch = 0
 
     # Resume
@@ -218,7 +215,7 @@ def main(args=args, use_cuda=use_cuda):
             'acc': val_acc,
             'best_acc': best_acc,
             'optimizer': optimizer.state_dict(),
-        }, is_best)
+        }, is_best, args.out)
         test_accs.append(test_acc)
         val_accs.append(val_acc)
     logger.close()
@@ -235,7 +232,7 @@ def main(args=args, use_cuda=use_cuda):
 def train(labeled_trainloader, unlabeled_trainloader, model,
           optimizer, ema_optimizer, criterion,
           gtg, criterion_gl, loss_func,
-          epoch, use_cuda, args=args):
+          epoch, use_cuda, args):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
@@ -359,7 +356,7 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
         bar.next()
     bar.finish()
 
-    return (losses.avg, losses_x.avg, losses_u.avg,)
+    return losses.avg, losses_x.avg, losses_u.avg
 
 
 def validate(valloader, model, criterion, epoch, use_cuda, mode):
@@ -383,7 +380,7 @@ def validate(valloader, model, criterion, epoch, use_cuda, mode):
                 inputs, targets = inputs.cuda(), targets.cuda(non_blocking=True)
             # compute output
             outputs, _ = model(inputs)
-            loss = criterion(outputs, targets.long())  # datatype issue: int vs long
+            loss = criterion(outputs, targets.long())
 
             # measure accuracy and record loss
             prec1, prec5 = accuracy(outputs, targets, topk=(1, 5))
@@ -409,17 +406,17 @@ def validate(valloader, model, criterion, epoch, use_cuda, mode):
             )
             bar.next()
         bar.finish()
-    return (losses.avg, top1.avg)
+    return losses.avg, top1.avg
 
 
-def save_checkpoint(state, is_best, checkpoint=args.out, filename='checkpoint.pth.tar'):
+def save_checkpoint(state, is_best, checkpoint, filename='checkpoint.pth.tar'):
     filepath = os.path.join(checkpoint, filename)
     torch.save(state, filepath)
     if is_best:
         shutil.copyfile(filepath, os.path.join(checkpoint, 'model_best.pth.tar'))
 
 
-def linear_rampup(current, rampup_length=args.epochs):
+def linear_rampup(current, rampup_length):
     if rampup_length == 0:
         return 1.0
     else:
@@ -431,6 +428,7 @@ class SemiLoss(object):
     def __init__(self, args):
         super().__init__()
         self.args = args
+
     def __call__(self,
                  outputs_x,
                  targets_x,
@@ -459,37 +457,36 @@ class SemiLoss(object):
         :param epoch:
         :return:
         """
-        args = self.args
         labs, L, U = get_labeled_and_unlabeled_points(orig_targets_x,
-                                                      num_points_per_class=args.num_labeled_per_class,
+                                                      num_points_per_class=self.args.num_labeled_per_class,
                                                       num_classes=10)
 
         # compute normalized softmax
-        probs_for_gtg = F.softmax(outputs_x / args.T_softmax, dim=1)
+        probs_for_gtg = F.softmax(outputs_x / self.args.T_softmax, dim=1)
 
         # do GTG (iterative process)
         probs_for_gtg, W = gtg(model_embeddings, model_embeddings.shape[0], labs, L, U, probs_for_gtg)
         probs_for_gtg = torch.log(probs_for_gtg + 1e-12)
         orig_targets_x = orig_targets_x.cuda()
         Lx = criterion_gl(probs_for_gtg, orig_targets_x.long()) + loss_func(outputs_x,
-                                                                            orig_targets_x.long())  # long: datatype issue
+                                                                            orig_targets_x.long())
 
         # Lx = -torch.mean(torch.sum(F.log_softmax(outputs_x, dim=1) * targets_x, dim=1))
 
         probs_u = torch.softmax(outputs_u, dim=1)
         Lu = torch.mean((probs_u - targets_u) ** 2)
 
-        return Lx, Lu, args.lambda_u * linear_rampup(epoch)
+        return Lx, Lu, self.args.lambda_u * linear_rampup(epoch, self.args.epochs)
 
 
 class WeightEMA(object):
-    def __init__(self, model, ema_model, alpha=0.999, args=args):
+    def __init__(self, model, ema_model, args, alpha=0.999):
         self.model = model
         self.ema_model = ema_model
         self.alpha = alpha
         self.params = list(model.state_dict().values())
         self.ema_params = list(ema_model.state_dict().values())
-        self.wd = 0.02 * args.lr
+        self.wd = 0.02 * 0.002 #args.lr
 
         for param, ema_param in zip(self.params, self.ema_params):
             param.data.copy_(ema_param.data)

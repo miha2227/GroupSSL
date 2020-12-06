@@ -1,18 +1,8 @@
 import random
 from math import log10
-from itertools import product
-import dataset.cifar10 as dataset
-import torch.utils.data as data
-import torchvision.transforms as transforms
-import torch.backends.cudnn as cudnn
-import models.wideresnet as models
-from group_loss.gtg import GTG
-import torch.nn as nn
-import torch.optim as optim
-from train import SemiLoss, WeightEMA
 import time
 import json
-from train import create_model, args_setup, main
+from train import args_setup, main
 
 ALLOWED_RANDOM_SEARCH_PARAMS = ['log', 'int', 'float', 'item']
 
@@ -20,7 +10,7 @@ ALLOWED_RANDOM_SEARCH_PARAMS = ['log', 'int', 'float', 'item']
 def random_search(random_search_spaces={
     "T_softmax": ([1, 100], "int"),
     "num_labeled_per_class": ([1, 3], "int"),
-    "alpha": ([0.5, 0.99], "float"),
+    #"alpha": ([0.5, 0.99], "float"),
     "lambda_u": ([75, 100], "int"),
     "lr": ([1e-5, 0.1], "float"),
 },
@@ -53,7 +43,7 @@ def findBestConfig(configs, epochs):
     best_val = None
     best_config = None
     best_config_id = None
-    best_model = None
+    #best_model = None
     results = []
 
     args = args_setup()
@@ -66,7 +56,7 @@ def findBestConfig(configs, epochs):
         args.out = 'random_search_op/Random_Search_{}_epochs_Configuration_{}'.format(epochs, i)
         args.T_softmax = configs[i]['T_softmax']
         args.num_labeled_per_class = configs[i]['num_labeled_per_class']
-        args.alpha = configs[i]['alpha']
+        #args.alpha = configs[i]['alpha']
         args.lambda_u = configs[i]['lambda_u']
         args.lr = configs[i]['lr']
 
@@ -117,7 +107,6 @@ def random_search_spaces_to_config(random_search_spaces):
             config[key] = random.choice(rng)
 
     return config
-
 
 if __name__ == '__main__':
     random_search()
