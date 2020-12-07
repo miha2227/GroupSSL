@@ -53,7 +53,7 @@ def findBestConfig(configs, epochs):
     for i in range(len(configs)):
         print("\nEvaluating Config #{} [of {}]:\n".format(
             (i + 1), len(configs)), configs[i])
-        args.out = 'random_search_op/Random_Search_{}_epochs_Configuration_{}'.format(epochs, i)
+        args.out = 'random_search_op_2/Random_Search_{}_epochs_Configuration_{}'.format(epochs, i+1)
         args.T_softmax = configs[i]['T_softmax']
         args.num_labeled_per_class = configs[i]['num_labeled_per_class']
         #args.alpha = configs[i]['alpha']
@@ -66,7 +66,7 @@ def findBestConfig(configs, epochs):
         if not best_val or max(results) > best_val:  # judged based on mean validation accuracy
             best_val, best_config, best_config_id = max(results), configs[i], i+1
     time_taken = time.time() - start
-    with open('random_search_log.txt', 'a') as f:
+    with open('random_search_log_2.txt', 'a') as f:
         f.write('Search completed for {} configurations with {} epochs for each'.format(len(configs), epochs))
         f.write('\nTotal tine taken: {} seconds'.format(time_taken))
         f.write('\nBest Config_id: {}'.format(best_config_id))
