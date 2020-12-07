@@ -53,22 +53,34 @@ def findBestConfig(configs, epochs):
     for i in range(len(configs)):
         print("\nEvaluating Config #{} [of {}]:\n".format(
             (i + 1), len(configs)), configs[i])
-        args.out = 'random_search_op_2/Random_Search_{}_epochs_Configuration_{}'.format(epochs, i+1)
+        args.out = 'random_search_op/Random_Search_{}_epochs_Configuration_{}'.format(epochs, i+1)
         args.T_softmax = configs[i]['T_softmax']
         args.num_labeled_per_class = configs[i]['num_labeled_per_class']
         #args.alpha = configs[i]['alpha']
         args.lambda_u = configs[i]['lambda_u']
         args.lr = configs[i]['lr']
 
-        b_v_acc, m_v_acc, m_t_acc = main(args=args, use_cuda=True)
-        results.append(m_v_acc)
+        with open('random_search_log.txt', 'a') as f:
+            if not i:
+                f.write('Config: {}, epochs: {}'.format(i+1, epochs))
+            else:
+                f.write('\n\nConfig: {}, epochs: {}'.format(i + 1, epochs))
+            f.write('\nHyperparams: {}'.format(json.dumps(configs[i])))
 
-        if not best_val or max(results) > best_val:  # judged based on mean validation accuracy
+        b_v_acc, m_v_acc, b_t_acc = main(args=args, use_cuda=True)
+        results.append(b_v_acc)
+
+        with open('random_search_log.txt', 'a') as f:
+            f.write('\nResults:')
+            f.write('\nbest_val_acc: {}, mean_val_acc: {}, best_test_acc: {}'.format(b_v_acc, m_v_acc, b_t_acc))
+
+        if not best_val or max(results) > best_val:  # judged based on best validation accuracy
             best_val, best_config, best_config_id = max(results), configs[i], i+1
+
     time_taken = time.time() - start
-    with open('random_search_log_2.txt', 'a') as f:
-        f.write('Search completed for {} configurations with {} epochs for each'.format(len(configs), epochs))
-        f.write('\nTotal tine taken: {} seconds'.format(time_taken))
+    with open('random_search_log.txt', 'a') as f:
+        f.write('\nSearch completed for {} configurations with {} epochs for each'.format(len(configs), epochs))
+        f.write('\nTotal time taken: {} seconds'.format(time_taken))
         f.write('\nBest Config_id: {}'.format(best_config_id))
         f.write('\nBest Configuration Details: \n')
         f.write(json.dumps(best_config))
