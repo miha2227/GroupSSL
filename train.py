@@ -109,7 +109,8 @@ def main(args, use_cuda):
     state = {k: v for k, v in args._get_kwargs()}
 
     #global best_acc
-    best_acc = 0  # best test accuracy
+    best_acc = 0  # best validation accuracy
+    best_t_acc = 0  # best test accuracy
     # Random seed
     np.random.seed(args.manualSeed)
     if not os.path.isdir(args.out):
@@ -161,7 +162,7 @@ def main(args, use_cuda):
     # Resume
     title = 'noisy-cifar-10'
     if args.resume:
-        # Load checkpoint.
+        # Load checkpoint
         print('==> Resuming from checkpoint..')
         assert os.path.isfile(args.resume), 'Error: no checkpoint directory found!'
         args.out = os.path.dirname(args.resume)
@@ -208,25 +209,27 @@ def main(args, use_cuda):
         # save model
         is_best = val_acc > best_acc
         best_acc = max(val_acc, best_acc)
-        save_checkpoint({
-            'epoch': epoch + 1,
-            'state_dict': model.state_dict(),
-            'ema_state_dict': ema_model.state_dict(),
-            'acc': val_acc,
-            'best_acc': best_acc,
-            'optimizer': optimizer.state_dict(),
-        }, is_best, args.out)
+        best_t_acc = max(test_acc, best_t_acc)
+
+        #save_checkpoint({
+        #    'epoch': epoch + 1,
+        #    'state_dict': model.state_dict(),
+        #    'ema_state_dict': ema_model.state_dict(),
+        #    'acc': val_acc,
+        #    'best_acc': best_acc,
+        #    'optimizer': optimizer.state_dict(),
+        #}, is_best, args.out)
         test_accs.append(test_acc)
         val_accs.append(val_acc)
     logger.close()
     writer.close()
 
-    print('Best acc: {}'.format(best_acc))
+    print('Best val acc: {}'.format(best_acc))
     mean_val_acc = np.mean(val_accs[-20:])
-    mean_test_acc = np.mean(test_accs[-20:])
+    #mean_test_acc = np.mean(test_accs[-20:])
     print('Mean val acc: {}'.format(mean_val_acc))
-    print('Mean test acc: {}'.format(mean_test_acc))
-    return best_acc, mean_val_acc, mean_test_acc
+    print('Mean test acc: {}'.format(best_t_acc))
+    return best_acc, mean_val_acc, best_t_acc
 
 
 def train(labeled_trainloader, unlabeled_trainloader, model,
@@ -244,6 +247,9 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
     bar = Bar('Training', max=args.train_iteration)
     labeled_train_iter = iter(labeled_trainloader)
     unlabeled_train_iter = iter(unlabeled_trainloader)
+
+    with open('random_search_log.txt', 'a') as f:
+        f.write('\nEpoch: {}'.format(epoch))
 
     model.train()
     for batch_idx in range(args.train_iteration):
@@ -406,6 +412,15 @@ def validate(valloader, model, criterion, epoch, use_cuda, mode):
             )
             bar.next()
         bar.finish()
+
+        with open('random_search_log.txt', 'a') as f:
+            f.write('\n {mode}: Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f}'.format(
+                    mode=mode,
+                    loss=losses.avg,
+                    top1=top1.avg,
+                    top5=top5.avg,
+                    ))
+
     return losses.avg, top1.avg
 
 
