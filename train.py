@@ -108,7 +108,7 @@ def create_model(use_cuda, ema=False):
 def main(args, use_cuda):
     state = {k: v for k, v in args._get_kwargs()}
 
-    #global best_acc
+    # global best_acc
     best_acc = 0  # best validation accuracy
     best_t_acc = 0  # best test accuracy
     # Random seed
@@ -248,8 +248,8 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
     labeled_train_iter = iter(labeled_trainloader)
     unlabeled_train_iter = iter(unlabeled_trainloader)
 
-    with open('random_search_log_3.txt', 'a') as f:
-        f.write('\nEpoch: {}'.format(epoch))
+    #with open('random_search_log_3.txt', 'a') as f:
+    #    f.write('\nEpoch: {}'.format(epoch))
 
     model.train()
     for batch_idx in range(args.train_iteration):
@@ -413,13 +413,13 @@ def validate(valloader, model, criterion, epoch, use_cuda, mode):
             bar.next()
         bar.finish()
 
-        with open('random_search_log_3.txt', 'a') as f:
-            f.write('\n {mode}: Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f}'.format(
-                    mode=mode,
-                    loss=losses.avg,
-                    top1=top1.avg,
-                    top5=top5.avg,
-                    ))
+        #with open('random_search_log_3.txt', 'a') as f:
+        #    f.write('\n {mode}: Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f}'.format(
+        #            mode=mode,
+        #            loss=losses.avg,
+        #            top1=top1.avg,
+        #            top5=top5.avg,
+        #            ))
 
     return losses.avg, top1.avg
 
@@ -537,4 +537,5 @@ def interleave(xy, batch):
 
 
 if __name__ == '__main__':
-    main()
+    args = args_setup()
+    main(args, use_cuda=True)
