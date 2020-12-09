@@ -461,8 +461,8 @@ class SemiLoss(object):
         and L2 loss for unlabeled data
 
         :param outputs_x:
-        :param targets_x: to get integer labels use torch.argmax(targets_x, dim=1)
-        :param orig_targets_x: as integers, and not one-hot encoded - can be omitted!
+        :param targets_x: one-hot encoded, to get integer labels use torch.argmax(targets_x, dim=1)
+        :param orig_targets_x: as integers, and not one-hot encoded
         :param model_embeddings:
         :param gtg: Group Loss
         :param criterion_gl: Negative Log-Likelihood loss function for Group Loss
@@ -483,8 +483,9 @@ class SemiLoss(object):
         probs_for_gtg, W = gtg(model_embeddings, model_embeddings.shape[0], labs, L, U, probs_for_gtg)
         probs_for_gtg = torch.log(probs_for_gtg + 1e-12)
         orig_targets_x = orig_targets_x.cuda()
-        Lx = criterion_gl(probs_for_gtg, orig_targets_x.long()) + loss_func(outputs_x,
-                                                                            orig_targets_x.long())
+        #Lx = criterion_gl(probs_for_gtg, orig_targets_x.long()) + loss_func(outputs_x,
+        #                                                                    orig_targets_x.long())
+        Lx = loss_func(outputs_x, orig_targets_x.long()) # removed group loss component
 
         # Lx = -torch.mean(torch.sum(F.log_softmax(outputs_x, dim=1) * targets_x, dim=1))
 
