@@ -483,9 +483,9 @@ class SemiLoss(object):
         probs_for_gtg, W = gtg(model_embeddings, model_embeddings.shape[0], labs, L, U, probs_for_gtg)
         probs_for_gtg = torch.log(probs_for_gtg + 1e-12)
         orig_targets_x = orig_targets_x.cuda()
-        #Lx = criterion_gl(probs_for_gtg, orig_targets_x.long()) + loss_func(outputs_x,
-        #                                                                    orig_targets_x.long())
-        Lx = loss_func(outputs_x, orig_targets_x.long()) # removed group loss component
+        Lx = criterion_gl(probs_for_gtg, orig_targets_x.long()) + loss_func(outputs_x,
+                                                                            orig_targets_x.long())
+        #Lx = loss_func(outputs_x, orig_targets_x.long()) # removed group loss component
 
         # Lx = -torch.mean(torch.sum(F.log_softmax(outputs_x, dim=1) * targets_x, dim=1))
 
