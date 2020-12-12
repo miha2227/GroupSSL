@@ -176,7 +176,8 @@ def main(args, use_cuda):
     else:
         logger = Logger(os.path.join(args.out, 'log.txt'), title=title)
         logger.set_names(
-            ['Train Loss', 'Train Loss X', 'Train Loss U', 'Valid Loss', 'Valid Acc.', 'Test Loss', 'Test Acc.'])
+            ['Train Loss', 'Train Loss X', 'Train Loss X_nll', 'Train Loss X_ce', 'Train Loss U', 'Valid Loss',
+             'Valid Acc.', 'Test Loss', 'Test Acc.'])
 
     writer = SummaryWriter(args.out)
     step = 0
@@ -186,7 +187,7 @@ def main(args, use_cuda):
     for epoch in range(start_epoch, args.epochs):
         print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, args.epochs, args.lr))
 
-        train_loss, train_loss_x, train_loss_u = train(labeled_trainloader, unlabeled_trainloader,
+        train_loss, train_loss_x, train_loss_nll, train_loss_ce, train_loss_u = train(labeled_trainloader, unlabeled_trainloader,
                                                        model, optimizer, ema_optimizer, train_criterion,
                                                        gtg, criterion_gl, criterion, epoch, use_cuda, args=args)
         _, train_acc = validate(labeled_trainloader, ema_model, criterion, epoch, use_cuda, mode='Train Stats')
@@ -196,6 +197,10 @@ def main(args, use_cuda):
         step = args.train_iteration * (epoch + 1)
 
         writer.add_scalar('losses/train_loss', train_loss, step)
+        writer.add_scalar('losses/train_loss_x', train_loss_x, step)
+        writer.add_scalar('losses/train_loss_nll', train_loss_nll, step)
+        writer.add_scalar('losses/train_loss_ce', train_loss_ce, step)
+        writer.add_scalar('losses/train_loss_u', train_loss_u, step)
         writer.add_scalar('losses/valid_loss', val_loss, step)
         writer.add_scalar('losses/test_loss', test_loss, step)
 
@@ -204,7 +209,8 @@ def main(args, use_cuda):
         writer.add_scalar('accuracy/test_acc', test_acc, step)
 
         # append logger file
-        logger.append([train_loss, train_loss_x, train_loss_u, val_loss, val_acc, test_loss, test_acc])
+        logger.append([train_loss, train_loss_x, train_loss_nll, train_loss_ce, train_loss_u, val_loss, val_acc,
+                       test_loss, test_acc])
 
         # save model
         is_best = val_acc > best_acc
@@ -240,6 +246,8 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
     data_time = AverageMeter()
     losses = AverageMeter()
     losses_x = AverageMeter()
+    losses_x_nll = AverageMeter()
+    losses_x_ce = AverageMeter()
     losses_u = AverageMeter()
     ws = AverageMeter()
     end = time.time()
@@ -248,8 +256,8 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
     labeled_train_iter = iter(labeled_trainloader)
     unlabeled_train_iter = iter(unlabeled_trainloader)
 
-    #with open('random_search_log_3.txt', 'a') as f:
-    #    f.write('\nEpoch: {}'.format(epoch))
+    with open('random_search_log.txt', 'a') as f:
+        f.write('\nEpoch: {}'.format(epoch))
 
     model.train()
     for batch_idx in range(args.train_iteration):
@@ -317,7 +325,7 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
         logits_x = logits[0]  # logits for labeled samples
         logits_u = torch.cat(logits[1:], dim=0)  # logits for unlabeled samples
 
-        Lx, Lu, w = criterion(logits_x,
+        Lx, Lx_nll, Lx_ce, Lu, w = criterion(logits_x,
                               mixed_target[:batch_size],
                               targets_int,
                               model_embed,
@@ -333,6 +341,8 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
         # record loss
         losses.update(loss.item(), inputs_x.size(0))
         losses_x.update(Lx.item(), inputs_x.size(0))
+        losses_x_nll.update(Lx_nll.item(), inputs_x.size(0))
+        losses_x_ce.update(Lx_ce.item(), inputs_x.size(0))
         losses_u.update(Lu.item(), inputs_x.size(0))
         ws.update(w, inputs_x.size(0))
 
@@ -362,7 +372,7 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
         bar.next()
     bar.finish()
 
-    return losses.avg, losses_x.avg, losses_u.avg
+    return losses.avg, losses_x.avg, losses_x_nll.avg, losses_x_ce.avg, losses_u.avg
 
 
 def validate(valloader, model, criterion, epoch, use_cuda, mode):
@@ -413,13 +423,13 @@ def validate(valloader, model, criterion, epoch, use_cuda, mode):
             bar.next()
         bar.finish()
 
-        #with open('random_search_log_3.txt', 'a') as f:
-        #    f.write('\n {mode}: Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f}'.format(
-        #            mode=mode,
-        #            loss=losses.avg,
-        #            top1=top1.avg,
-        #            top5=top5.avg,
-        #            ))
+        with open('random_search_log.txt', 'a') as f:
+            f.write('\n {mode}: Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f}'.format(
+                    mode=mode,
+                    loss=losses.avg,
+                    top1=top1.avg,
+                    top5=top5.avg,
+                    ))
 
     return losses.avg, top1.avg
 
@@ -483,16 +493,15 @@ class SemiLoss(object):
         probs_for_gtg, W = gtg(model_embeddings, model_embeddings.shape[0], labs, L, U, probs_for_gtg)
         probs_for_gtg = torch.log(probs_for_gtg + 1e-12)
         orig_targets_x = orig_targets_x.cuda()
-        Lx = criterion_gl(probs_for_gtg, orig_targets_x.long()) + loss_func(outputs_x,
-                                                                            orig_targets_x.long())
-        #Lx = loss_func(outputs_x, orig_targets_x.long()) # removed group loss component
-
+        Lx_nll = criterion_gl(probs_for_gtg, orig_targets_x.long())
+        Lx_ce = loss_func(outputs_x, orig_targets_x.long())
+        Lx = Lx_nll + Lx_ce
         # Lx = -torch.mean(torch.sum(F.log_softmax(outputs_x, dim=1) * targets_x, dim=1))
 
         probs_u = torch.softmax(outputs_u, dim=1)
         Lu = torch.mean((probs_u - targets_u) ** 2)
 
-        return Lx, Lu, self.args.lambda_u * linear_rampup(epoch, self.args.epochs)
+        return Lx, Lx_nll, Lx_ce, Lu, self.args.lambda_u * linear_rampup(epoch, self.args.epochs)
 
 
 class WeightEMA(object):

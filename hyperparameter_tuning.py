@@ -10,11 +10,11 @@ ALLOWED_RANDOM_SEARCH_PARAMS = ['log', 'int', 'float', 'item']
 def random_search(random_search_spaces={
     "T_softmax": ([1, 100], "int"),
     "num_labeled_per_class": ([1, 3], "int"),
-    #"alpha": ([0.5, 0.99], "float"),
-    "lambda_u": ([75, 100], "int"),
+    "alpha": ([0.1, 0.99], "float"),
+    "lambda_u": ([1, 100], "int"),
     "lr": ([1e-5, 0.1], "float"),
 },
-        num_search=2, epochs=2,
+        num_search=50, epochs=20,
         patience=5):
     """
     Samples N_SEARCH hyper parameter sets within the provided search spaces
@@ -33,7 +33,7 @@ def random_search(random_search_spaces={
     return findBestConfig(configs, epochs)
 
 
-def findBestConfig(configs, epochs, log_file='random_search_log_dt.txt'):
+def findBestConfig(configs, epochs, log_file='random_search_log.txt'):
     """
     Get a list of hyperparameter configs for random search or grid search,
     trains a model on all configs and returns the one performing best
@@ -57,21 +57,21 @@ def findBestConfig(configs, epochs, log_file='random_search_log_dt.txt'):
             args.out = 'random_search_op/Random_Search_{}_epochs_Configuration_{}'.format(epochs, i+1)
             args.T_softmax = configs[i]['T_softmax']
             args.num_labeled_per_class = configs[i]['num_labeled_per_class']
-            #args.alpha = configs[i]['alpha']
+            args.alpha = configs[i]['alpha']
             args.lambda_u = configs[i]['lambda_u']
             args.lr = configs[i]['lr']
 
-        #with open('random_search_log.txt', 'a') as f:
-            #if not i:
-            #    f.write('Config: {}, epochs: {}'.format(i+1, epochs))
-            #else:
-            f.write('\n\nConfig: {}, epochs: {}'.format(i + 1, epochs))
+        with open('random_search_log.txt', 'a') as f:
+            if not i:
+                f.write('Config: {}, epochs: {}'.format(i+1, epochs))
+            else:
+                f.write('\n\nConfig: {}, epochs: {}'.format(i + 1, epochs))
             f.write('\nHyperparams: {}'.format(json.dumps(configs[i])))
 
             b_v_acc, m_v_acc, b_t_acc = main(args=args, use_cuda=True)
             results.append(b_v_acc)
 
-        #with open('random_search_log.txt', 'a') as f:
+        with open('random_search_log.txt', 'a') as f:
             f.write('\nResults:')
             f.write('\nbest_val_acc: {}, mean_val_acc: {}, best_test_acc: {}'.format(b_v_acc, m_v_acc, b_t_acc))
 
@@ -79,7 +79,7 @@ def findBestConfig(configs, epochs, log_file='random_search_log_dt.txt'):
                 best_val, best_config, best_config_id = max(results), configs[i], i+1
 
         time_taken = time.time() - start
-    #with open('random_search_log.txt', 'a') as f:
+    with open('random_search_log.txt', 'a') as f:
         f.write('\n\nSummary:\n==========================')
         f.write('\nSearch completed for {} configurations with {} epochs for each'.format(len(configs), epochs))
         f.write('\nTotal time taken: {} seconds'.format(time_taken))
