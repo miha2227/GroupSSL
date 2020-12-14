@@ -33,7 +33,7 @@ def random_search(random_search_spaces={
     return findBestConfig(configs, epochs)
 
 
-def findBestConfig(configs, epochs, log_file='random_search_log.txt'):
+def findBestConfig(configs, epochs, log_file='random_search_log_50_{}.txt'):
     """
     Get a list of hyperparameter configs for random search or grid search,
     trains a model on all configs and returns the one performing best
@@ -49,19 +49,19 @@ def findBestConfig(configs, epochs, log_file='random_search_log.txt'):
     args = args_setup()
 
     args.epochs = epochs
-    with open(log_file, 'a') as f:
-        start = time.time()
-        for i in range(len(configs)):
-            print("\nEvaluating Config #{} [of {}]:\n".format(
-                (i + 1), len(configs)), configs[i])
-            args.out = 'random_search_op/Random_Search_{}_epochs_Configuration_{}'.format(epochs, i+1)
-            args.T_softmax = configs[i]['T_softmax']
-            args.num_labeled_per_class = configs[i]['num_labeled_per_class']
-            args.alpha = configs[i]['alpha']
-            args.lambda_u = configs[i]['lambda_u']
-            args.lr = configs[i]['lr']
+    #with open(log_file, 'a') as f:
+    start = time.time()
+    for i in range(len(configs)):
+        print("\nEvaluating Config #{} [of {}]:\n".format(
+            (i + 1), len(configs)), configs[i])
+        args.out = 'random_search_op_{}/Random_Search_{}_epochs_Configuration_{}'.format(args.n_labeled, epochs, i+1)
+        args.T_softmax = configs[i]['T_softmax']
+        args.num_labeled_per_class = configs[i]['num_labeled_per_class']
+        args.alpha = configs[i]['alpha']
+        args.lambda_u = configs[i]['lambda_u']
+        args.lr = configs[i]['lr']
 
-        with open('random_search_log.txt', 'a') as f:
+        with open('random_search_log_50_{}.txt'.format(args.n_labeled), 'a') as f:
             if not i:
                 f.write('Config: {}, epochs: {}'.format(i+1, epochs))
             else:
@@ -71,15 +71,15 @@ def findBestConfig(configs, epochs, log_file='random_search_log.txt'):
             b_v_acc, m_v_acc, b_t_acc = main(args=args, use_cuda=True)
             results.append(b_v_acc)
 
-        with open('random_search_log.txt', 'a') as f:
+        with open('random_search_log_50_{}.txt'.format(args.n_labeled), 'a') as f:
             f.write('\nResults:')
             f.write('\nbest_val_acc: {}, mean_val_acc: {}, best_test_acc: {}'.format(b_v_acc, m_v_acc, b_t_acc))
 
             if not best_val or max(results) > best_val:  # judged based on best validation accuracy
                 best_val, best_config, best_config_id = max(results), configs[i], i+1
 
-        time_taken = time.time() - start
-    with open('random_search_log.txt', 'a') as f:
+    time_taken = time.time() - start
+    with open('random_search_log_50_{}.txt'.format(args.n_labeled), 'a') as f:
         f.write('\n\nSummary:\n==========================')
         f.write('\nSearch completed for {} configurations with {} epochs for each'.format(len(configs), epochs))
         f.write('\nTotal time taken: {} seconds'.format(time_taken))

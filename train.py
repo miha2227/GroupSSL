@@ -190,9 +190,9 @@ def main(args, use_cuda):
         train_loss, train_loss_x, train_loss_nll, train_loss_ce, train_loss_u = train(labeled_trainloader, unlabeled_trainloader,
                                                        model, optimizer, ema_optimizer, train_criterion,
                                                        gtg, criterion_gl, criterion, epoch, use_cuda, args=args)
-        _, train_acc = validate(labeled_trainloader, ema_model, criterion, epoch, use_cuda, mode='Train Stats')
-        val_loss, val_acc = validate(val_loader, ema_model, criterion, epoch, use_cuda, mode='Valid Stats')
-        test_loss, test_acc = validate(test_loader, ema_model, criterion, epoch, use_cuda, mode='Test Stats ')
+        _, train_acc = validate(labeled_trainloader, ema_model, criterion, epoch, use_cuda, mode='Train Stats',args=args)
+        val_loss, val_acc = validate(val_loader, ema_model, criterion, epoch, use_cuda, mode='Valid Stats',args=args)
+        test_loss, test_acc = validate(test_loader, ema_model, criterion, epoch, use_cuda, mode='Test Stats',args=args)
 
         step = args.train_iteration * (epoch + 1)
 
@@ -256,7 +256,7 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
     labeled_train_iter = iter(labeled_trainloader)
     unlabeled_train_iter = iter(unlabeled_trainloader)
 
-    with open('random_search_log.txt', 'a') as f:
+    with open('random_search_log_50_{}.txt'.format(args.n_labeled), 'a') as f:
         f.write('\nEpoch: {}'.format(epoch))
 
     model.train()
@@ -375,7 +375,7 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
     return losses.avg, losses_x.avg, losses_x_nll.avg, losses_x_ce.avg, losses_u.avg
 
 
-def validate(valloader, model, criterion, epoch, use_cuda, mode):
+def validate(valloader, model, criterion, epoch, use_cuda, mode, args=None):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
@@ -423,7 +423,7 @@ def validate(valloader, model, criterion, epoch, use_cuda, mode):
             bar.next()
         bar.finish()
 
-        with open('random_search_log.txt', 'a') as f:
+        with open('random_search_log_50_{}.txt'.format(args.n_labeled), 'a') as f:
             f.write('\n {mode}: Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f}'.format(
                     mode=mode,
                     loss=losses.avg,
