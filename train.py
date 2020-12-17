@@ -256,7 +256,7 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
     labeled_train_iter = iter(labeled_trainloader)
     unlabeled_train_iter = iter(unlabeled_trainloader)
 
-    with open('random_search_log_50_{}.txt'.format(args.n_labeled), 'a') as f:
+    with open('{}_log.txt'.format(args.out), 'a') as f:
         f.write('\nEpoch: {}'.format(epoch))
 
     model.train()
@@ -423,7 +423,7 @@ def validate(valloader, model, criterion, epoch, use_cuda, mode, args=None):
             bar.next()
         bar.finish()
 
-        with open('random_search_log_50_{}.txt'.format(args.n_labeled), 'a') as f:
+        with open('{}_log.txt'.format(args.out), 'a') as f:
             f.write('\n {mode}: Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f}'.format(
                     mode=mode,
                     loss=losses.avg,
