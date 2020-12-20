@@ -85,12 +85,12 @@ def args_setup():
     return args
 
 
-#args = args_setup()
-#state = {k: v for k, v in args._get_kwargs()}
+# args = args_setup()
+# state = {k: v for k, v in args._get_kwargs()}
 
 # Use CUDA
-#os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
-#use_cuda = torch.cuda.is_available()
+# os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
+# use_cuda = torch.cuda.is_available()
 
 
 # endregion
@@ -187,12 +187,16 @@ def main(args, use_cuda):
     for epoch in range(start_epoch, args.epochs):
         print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, args.epochs, args.lr))
 
-        train_loss, train_loss_x, train_loss_nll, train_loss_ce, train_loss_u = train(labeled_trainloader, unlabeled_trainloader,
-                                                       model, optimizer, ema_optimizer, train_criterion,
-                                                       gtg, criterion_gl, criterion, epoch, use_cuda, args=args)
-        _, train_acc = validate(labeled_trainloader, ema_model, criterion, epoch, use_cuda, mode='Train Stats',args=args)
-        val_loss, val_acc = validate(val_loader, ema_model, criterion, epoch, use_cuda, mode='Valid Stats',args=args)
-        test_loss, test_acc = validate(test_loader, ema_model, criterion, epoch, use_cuda, mode='Test Stats',args=args)
+        train_loss, train_loss_x, train_loss_nll, train_loss_ce, train_loss_u = train(labeled_trainloader,
+                                                                                      unlabeled_trainloader,
+                                                                                      model, optimizer, ema_optimizer,
+                                                                                      train_criterion,
+                                                                                      gtg, criterion_gl, criterion,
+                                                                                      epoch, use_cuda, args=args)
+        _, train_acc = validate(labeled_trainloader, ema_model, criterion, epoch, use_cuda, mode='Train Stats',
+                                args=args)
+        val_loss, val_acc = validate(val_loader, ema_model, criterion, epoch, use_cuda, mode='Valid Stats', args=args)
+        test_loss, test_acc = validate(test_loader, ema_model, criterion, epoch, use_cuda, mode='Test Stats', args=args)
 
         step = args.train_iteration * (epoch + 1)
 
@@ -217,14 +221,14 @@ def main(args, use_cuda):
         best_acc = max(val_acc, best_acc)
         best_t_acc = max(test_acc, best_t_acc)
 
-        #save_checkpoint({
+        # save_checkpoint({
         #    'epoch': epoch + 1,
         #    'state_dict': model.state_dict(),
         #    'ema_state_dict': ema_model.state_dict(),
         #    'acc': val_acc,
         #    'best_acc': best_acc,
         #    'optimizer': optimizer.state_dict(),
-        #}, is_best, args.out)
+        # }, is_best, args.out)
         test_accs.append(test_acc)
         val_accs.append(val_acc)
     logger.close()
@@ -232,16 +236,17 @@ def main(args, use_cuda):
 
     print('Best val acc: {}'.format(best_acc))
     mean_val_acc = np.mean(val_accs[-20:])
-    #mean_test_acc = np.mean(test_accs[-20:])
+    # mean_test_acc = np.mean(test_accs[-20:])
     print('Mean val acc: {}'.format(mean_val_acc))
-    print('Mean test acc: {}'.format(best_t_acc))
+    print('Best test acc: {}'.format(best_t_acc))
     return best_acc, mean_val_acc, best_t_acc
 
 
 def train(labeled_trainloader, unlabeled_trainloader, model,
           optimizer, ema_optimizer, criterion,
           gtg, criterion_gl, loss_func,
-          epoch, use_cuda, args):
+          epoch, use_cuda, args, log_enabled=True):
+
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
@@ -256,8 +261,9 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
     labeled_train_iter = iter(labeled_trainloader)
     unlabeled_train_iter = iter(unlabeled_trainloader)
 
-    with open('{}_log.txt'.format(args.out), 'a') as f:
-        f.write('\nEpoch: {}'.format(epoch))
+    if log_enabled:
+        with open('{}_log.txt'.format(args.out), 'a') as f:
+            f.write('\nEpoch: {}'.format(epoch))
 
     model.train()
     for batch_idx in range(args.train_iteration):
@@ -326,15 +332,15 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
         logits_u = torch.cat(logits[1:], dim=0)  # logits for unlabeled samples
 
         Lx, Lx_nll, Lx_ce, Lu, w = criterion(logits_x,
-                              mixed_target[:batch_size],
-                              targets_int,
-                              model_embed,
-                              gtg,
-                              criterion_gl,
-                              loss_func,
-                              logits_u,
-                              mixed_target[batch_size:],
-                              epoch + batch_idx / args.train_iteration)
+                                             mixed_target[:batch_size],
+                                             targets_int,
+                                             model_embed,
+                                             gtg,
+                                             criterion_gl,
+                                             loss_func,
+                                             logits_u,
+                                             mixed_target[batch_size:],
+                                             epoch + batch_idx / args.train_iteration)
 
         loss = Lx + w * Lu
 
@@ -375,7 +381,7 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
     return losses.avg, losses_x.avg, losses_x_nll.avg, losses_x_ce.avg, losses_u.avg
 
 
-def validate(valloader, model, criterion, epoch, use_cuda, mode, args=None):
+def validate(valloader, model, criterion, epoch, use_cuda, mode, args=None, log_enabled=True):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
@@ -423,13 +429,14 @@ def validate(valloader, model, criterion, epoch, use_cuda, mode, args=None):
             bar.next()
         bar.finish()
 
-        with open('{}_log.txt'.format(args.out), 'a') as f:
-            f.write('\n {mode}: Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f}'.format(
+        if log_enabled:
+            with open('{}_log.txt'.format(args.out), 'a') as f:
+                f.write('\n {mode}: Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f}'.format(
                     mode=mode,
                     loss=losses.avg,
                     top1=top1.avg,
                     top5=top5.avg,
-                    ))
+                ))
 
     return losses.avg, top1.avg
 
@@ -511,7 +518,7 @@ class WeightEMA(object):
         self.alpha = alpha
         self.params = list(model.state_dict().values())
         self.ema_params = list(ema_model.state_dict().values())
-        self.wd = 0.02 * 0.002 #args.lr
+        self.wd = 0.02 * 0.002  # args.lr
 
         for param, ema_param in zip(self.params, self.ema_params):
             param.data.copy_(ema_param.data)
