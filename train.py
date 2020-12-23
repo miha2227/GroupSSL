@@ -27,6 +27,13 @@ from group_loss.gtg import GTG
 from utils.misc import get_labeled_and_unlabeled_points
 
 
+def setup_random_seed(seed):
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+
+
 def args_setup():
     # region: arguments
     parser = argparse.ArgumentParser(description='PyTorch MixMatch with Group Loss Training')
@@ -112,7 +119,7 @@ def main(args, use_cuda):
     best_acc = 0  # best validation accuracy
     best_t_acc = 0  # best test accuracy
     # Random seed
-    np.random.seed(args.manualSeed)
+    setup_random_seed(args.manualSeed)
     if not os.path.isdir(args.out):
         mkdir_p(args.out)
 
@@ -239,6 +246,13 @@ def main(args, use_cuda):
     # mean_test_acc = np.mean(test_accs[-20:])
     print('Mean val acc: {}'.format(mean_val_acc))
     print('Best test acc: {}'.format(best_t_acc))
+    with open('{}_log.txt'.format(args.out), 'a') as f:
+        f.write(
+            '\n Best val acc: {best_acc: .4f} \n Mean val acc: {mean_val_acc: .4f} \n Best test acc: {best_t_acc: .4f}'.format(
+                best_acc=best_acc,
+                mean_val_acc=mean_val_acc,
+                best_t_acc=best_t_acc
+            ))
     return best_acc, mean_val_acc, best_t_acc
 
 

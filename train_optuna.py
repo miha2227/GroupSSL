@@ -1,5 +1,6 @@
 import optuna
 import time
+import random
 from train import args_setup, WeightEMA, train, validate, SemiLoss
 import torch
 import torch.utils.data as data
@@ -13,29 +14,19 @@ import numpy as np
 from group_loss.gtg import GTG
 
 
-# def objective(trial):
-#     # put your code here
-#     # pass
-#     x = trial.suggest_uniform('x', -100, 100)
-#     # return evaluation_score
-#     return (x - 2) ** 2
+def setup_random_seed(seed):
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
 
 
-# def objective2(trial):
-#     # hyperparameter setting
-#     alpha = trial.suggest_uniform('alpha', 0.0, 2.0)
-#
-#     # data loading and train-test split
-#     X, y = sklearn.datasets.load_boston(return_X_y=True)
-#     X_train, X_val, y_train, y_val = sklearn.model_selection.train_test_split(X, y, random_state=0)
-#
-#     # model training and evaluation
-#     model = sklearn.linear_model.Lasso(alpha=alpha)
-#     model.fit(X_train, y_train)
-#     y_pred = model.predict(X_val)
-#     error = sklearn.metrics.mean_squared_error(y_val, y_pred)
-#     # output: evaluation score
-#     return error
+def unset_random_seed():
+    seed = None
+    # torch.manual_seed(seed)
+    # torch.cuda.manual_seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
 
 
 def setup_data(args):
@@ -83,9 +74,6 @@ def setup_models(use_cuda, n_classes):
 
 
 def train_GroupSSL(trial):  # Objective wrapper for Optuna to tune.
-
-    # Warning!!!: Careful about the default values of the arguments, specially number_of_epochs and out, while running this
-
     # region setup args and environment
     args = args_setup()
     use_cuda = torch.cuda.is_available()
@@ -95,20 +83,25 @@ def train_GroupSSL(trial):  # Objective wrapper for Optuna to tune.
     else:
         device = 'cpu'
         cudnn.benchmark = False
+
     # endregion
 
+    # Warning!!!: Careful about the default values of the arguments, specially number_of_epochs and out, while running this
     # override number of epoch, number of labled, out folder
-    args.epochs = 20
+    args.epochs = 25
     args.n_labeled = 250
-    args.out = 'Optuna_Test_20_250'
+    #args.out = 'test_optuna_fixed_random_seed'
+    args.out = 'FixedSed_Optuna_60_250_with_pruning_andShorter_range_fixedSeed'
 
     # region override args of interest with hyper params to tune from optuna suggest
-    args.T_softmax = trial.suggest_uniform('T_softmax', 1, 100)
-    args.num_labeled_per_class = trial.suggest_int('num_labeled_per_class', 1, 5)
-    args.alpha = trial.suggest_float('alpha', 0.1, 0.99)
-    args.lambda_u = trial.suggest_int('lambda_u', 1, 100)
-    args.lr = trial.suggest_float('lr', 1e-5, 0.1)
+    args.T_softmax = trial.suggest_int('T_softmax', 20, 100)
+    # args.num_labeled_per_class = trial.suggest_int('num_labeled_per_class', 1, 5)
+    args.alpha = trial.suggest_float('alpha', 0.7, 0.9)
+    args.lambda_u = trial.suggest_int('lambda_u', 35, 105)
+    args.lr = trial.suggest_float('lr', 0.001, 0.05)
     # endregion
+
+    setup_random_seed(args.manualSeed)
 
     # region setup data
     labeled_trainloader, unlabeled_trainloader, val_loader, test_loader, n_classes = setup_data(args)
@@ -137,7 +130,7 @@ def train_GroupSSL(trial):  # Objective wrapper for Optuna to tune.
     best_t_acc = 0
 
     for epoch in range(args.epochs):
-        print('\nRunning epoch {} of {}:\n====================='.format(epoch,args.epochs))
+        print('\nRunning epoch {} of {}:\n====================='.format(epoch+1, args.epochs))
         # train loss(es)
         train_loss, train_loss_x, train_loss_nll, train_loss_ce, train_loss_u = train(labeled_trainloader,
                                                                                       unlabeled_trainloader,
@@ -162,13 +155,21 @@ def train_GroupSSL(trial):  # Objective wrapper for Optuna to tune.
         test_accs.append(test_acc)
         val_accs.append(val_acc)
 
+        # report for pruning
+        trial.report(best_acc, epoch)  # need to think more
+
+        # Handle pruning based on the intermediate value.
+        if trial.should_prune():
+            raise optuna.TrialPruned()
+
     # endregion
 
     # region post_processing
     # calculate best, average of loss and accuracies
     mean_val_acc = np.mean(val_accs[-20:])  # todo:ask doubt-> Do we also need to use best validation acc?
     mean_test_acc = np.mean(test_accs[-20:])
-    evaluation_score = mean_val_acc.item()  # TODO: set this to the judging performance measure, best validation accuracy wil be used later
+    evaluation_score = best_acc  # TODO: set this to the judging performance measure, best validation accuracy wil be used later
+    unset_random_seed()  # not to influence the processes of choosing next configuration of hyper parameters
     # endregion
 
     # return score of the objective function, in this particular case mean validation accuracy
@@ -176,8 +177,11 @@ def train_GroupSSL(trial):  # Objective wrapper for Optuna to tune.
 
 
 if __name__ == '__main__':
-    study = optuna.create_study(direction='maximize', study_name='tune_GroupSSL_20_250',
-                                storage='sqlite:///GroupSSL_HypParLog_20_250.db', load_if_exists=True)
-    study.optimize(train_GroupSSL, n_trials=10)  # if runningg in P paralel proceses, the set n_trials = (intended number of trials) / P
-    time.sleep(2)
+    study = optuna.create_study(direction='maximize', study_name='tune_GroupSSL_60_250_with_pruning_fixed_seed',
+                                #storage='sqlite:///GroupSSL_optuna_with_pruning_and_fixed_seed.db', load_if_exists=True)
+                                storage='sqlite:///GroupSSL_HypParLog_60_250_with_pruning_fixed_seed.db', load_if_exists=True)
+    study.optimize(train_GroupSSL, n_trials=30)  # if runningg in P paralel proceses, the set n_trials = (intended number of trials) / P
+    time.sleep(1)
+    print('\nBest objective value: {}'.format(study.best_value))
+    print('\nBest trial: {}'.format(str(study.best_trial)))
     print('\n\nBest parameter value: {}'.format(str(study.best_params)))
