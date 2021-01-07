@@ -1,0 +1,465 @@
+
+Running Trial 1...
+
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+
+Running epoch 1 of 25:
+=====================
+
+Running epoch 2 of 25:
+=====================
+
+Running epoch 3 of 25:
+=====================
+
+Running epoch 4 of 25:
+=====================
+
+Running epoch 5 of 25:
+=====================
+
+Running epoch 6 of 25:
+=====================
+
+Running epoch 7 of 25:
+=====================
+
+Running epoch 8 of 25:
+=====================
+
+Running epoch 9 of 25:
+=====================
+
+Running epoch 10 of 25:
+=====================
+
+Running epoch 11 of 25:
+=====================
+
+Running epoch 12 of 25:
+=====================
+
+Running epoch 13 of 25:
+=====================
+
+Running epoch 14 of 25:
+=====================
+
+Running epoch 15 of 25:
+=====================
+
+Running epoch 16 of 25:
+=====================
+
+Running epoch 17 of 25:
+=====================
+
+Running epoch 18 of 25:
+=====================
+
+Running epoch 19 of 25:
+=====================
+
+Running epoch 20 of 25:
+=====================
+
+Running epoch 21 of 25:
+=====================
+
+Running epoch 22 of 25:
+=====================
+
+Running epoch 23 of 25:
+=====================
+
+Running epoch 24 of 25:
+=====================
+
+Running epoch 25 of 25:
+=====================
+Best val acc: 32.02
+Mean val acc: 23.895000000000003
+Best test acc: 32.02
+
+Running Trial 2...
+
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+
+Running epoch 1 of 25:
+=====================
+
+Running epoch 2 of 25:
+=====================
+
+Running epoch 3 of 25:
+=====================
+
+Running epoch 4 of 25:
+=====================
+
+Running epoch 5 of 25:
+=====================
+
+Running epoch 6 of 25:
+=====================
+
+Running epoch 7 of 25:
+=====================
+
+Running epoch 8 of 25:
+=====================
+
+Running epoch 9 of 25:
+=====================
+
+Running epoch 10 of 25:
+=====================
+
+Running epoch 11 of 25:
+=====================
+
+Running epoch 12 of 25:
+=====================
+
+Running epoch 13 of 25:
+=====================
+
+Running epoch 14 of 25:
+=====================
+
+Running epoch 15 of 25:
+=====================
+
+Running epoch 16 of 25:
+=====================
+
+Running epoch 17 of 25:
+=====================
+
+Running epoch 18 of 25:
+=====================
+
+Running epoch 19 of 25:
+=====================
+
+Running epoch 20 of 25:
+=====================
+
+Running epoch 21 of 25:
+=====================
+
+Running epoch 22 of 25:
+=====================
+
+Running epoch 23 of 25:
+=====================
+
+Running epoch 24 of 25:
+=====================
+
+Running epoch 25 of 25:
+=====================
+Best val acc: 40.22
+Mean val acc: 32.532
+Best test acc: 40.57
+
+Running Trial 3...
+
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+
+Running epoch 1 of 25:
+=====================
+
+Running epoch 2 of 25:
+=====================
+
+Running epoch 3 of 25:
+=====================
+
+Running epoch 4 of 25:
+=====================
+
+Running epoch 5 of 25:
+=====================
+
+Running epoch 6 of 25:
+=====================
+
+Running epoch 7 of 25:
+=====================
+
+Running epoch 8 of 25:
+=====================
+
+Running epoch 9 of 25:
+=====================
+
+Running epoch 10 of 25:
+=====================
+
+Running epoch 11 of 25:
+=====================
+
+Running epoch 12 of 25:
+=====================
+
+Running epoch 13 of 25:
+=====================
+
+Running epoch 14 of 25:
+=====================
+
+Running epoch 15 of 25:
+=====================
+
+Running epoch 16 of 25:
+=====================
+
+Running epoch 17 of 25:
+=====================
+
+Running epoch 18 of 25:
+=====================
+
+Running epoch 19 of 25:
+=====================
+
+Running epoch 20 of 25:
+=====================
+
+Running epoch 21 of 25:
+=====================
+
+Running epoch 22 of 25:
+=====================
+
+Running epoch 23 of 25:
+=====================
+
+Running epoch 24 of 25:
+=====================
+
+Running epoch 25 of 25:
+=====================
+Best val acc: 46.5
+Mean val acc: 42.619
+Best test acc: 46.34
+
+Running Trial 4...
+
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+
+Running epoch 1 of 25:
+=====================
+
+Running epoch 2 of 25:
+=====================
+
+Running epoch 3 of 25:
+=====================
+
+Running epoch 4 of 25:
+=====================
+
+Running epoch 5 of 25:
+=====================
+
+Running epoch 6 of 25:
+=====================
+
+Running epoch 7 of 25:
+=====================
+
+Running epoch 8 of 25:
+=====================
+
+Running epoch 9 of 25:
+=====================
+
+Running epoch 10 of 25:
+=====================
+
+Running epoch 11 of 25:
+=====================
+
+Running epoch 12 of 25:
+=====================
+
+Running epoch 13 of 25:
+=====================
+
+Running epoch 14 of 25:
+=====================
+
+Running epoch 15 of 25:
+=====================
+
+Running epoch 16 of 25:
+=====================
+
+Running epoch 17 of 25:
+=====================
+
+Running epoch 18 of 25:
+=====================
+
+Running epoch 19 of 25:
+=====================
+
+Running epoch 20 of 25:
+=====================
+
+Running epoch 21 of 25:
+=====================
+
+Running epoch 22 of 25:
+=====================
+
+Running epoch 23 of 25:
+=====================
+
+Running epoch 24 of 25:
+=====================
+
+Running epoch 25 of 25:
+=====================
+Best val acc: 37.14
+Mean val acc: 28.433999999999997
+Best test acc: 37.65
+
+Running Trial 5...
+
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+
+Running epoch 1 of 25:
+=====================
+
+Running epoch 2 of 25:
+=====================
+
+Running epoch 3 of 25:
+=====================
+
+Running epoch 4 of 25:
+=====================
+
+Running epoch 5 of 25:
+=====================
+
+Running epoch 6 of 25:
+=====================
+
+Running epoch 7 of 25:
+=====================
+
+Running epoch 8 of 25:
+=====================
+
+Running epoch 9 of 25:
+=====================
+
+Running epoch 10 of 25:
+=====================
+
+Running epoch 11 of 25:
+=====================
+
+Running epoch 12 of 25:
+=====================
+
+Running epoch 13 of 25:
+=====================
+
+Running epoch 14 of 25:
+=====================
+
+Running epoch 15 of 25:
+=====================
+
+Running epoch 16 of 25:
+=====================
+
+Running epoch 17 of 25:
+=====================
+
+Running epoch 18 of 25:
+=====================
+
+Running epoch 19 of 25:
+=====================
+
+Running epoch 20 of 25:
+=====================
+
+Running epoch 21 of 25:
+=====================
+
+Running epoch 22 of 25:
+=====================
+
+Running epoch 23 of 25:
+=====================
+
+Running epoch 24 of 25:
+=====================
+
+Running epoch 25 of 25:
+=====================
+Best val acc: 32.0
+Mean val acc: 18.823999999999998
+Best test acc: 32.5
+
+Running Trial 6...
+
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+
+Running epoch 1 of 25:
+=====================
+
+Running epoch 2 of 25:
+=====================
+
+Running epoch 3 of 25:
+=====================
+
+Running epoch 4 of 25:
+=====================
+
+Running epoch 5 of 25:
+=====================
+
+Running epoch 6 of 25:
+=====================
+
+Running epoch 7 of 25:
+=====================
+
+Running epoch 8 of 25:
+=====================
+
+Running epoch 9 of 25:
+=====================

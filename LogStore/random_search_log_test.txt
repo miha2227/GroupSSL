@@ -1,0 +1,17 @@
+Config: 1, epochs: 2
+Hyperparams: {"T_softmax": 41, "num_labeled_per_class": 2, "lambda_u": 91, "lr": 0.024885487243120983}
+Results:
+best_val_acc: 18.32, mean_val_acc: 14.16, best_test_acc: 18.51
+
+Config: 2, epochs: 2
+Hyperparams: {"T_softmax": 65, "num_labeled_per_class": 2, "lambda_u": 76, "lr": 0.09247465034892824}
+Results:
+best_val_acc: 10.0, mean_val_acc: 10.0, best_test_acc: 10.0
+
+Summary:
+==========================
+Search completed for 2 configurations with 2 epochs for each
+Total time taken: 205.6685872077942 seconds
+Best Config_id: 1
+Best Configuration Details: 
+{"T_softmax": 41, "num_labeled_per_class": 2, "lambda_u": 91, "lr": 0.024885487243120983}

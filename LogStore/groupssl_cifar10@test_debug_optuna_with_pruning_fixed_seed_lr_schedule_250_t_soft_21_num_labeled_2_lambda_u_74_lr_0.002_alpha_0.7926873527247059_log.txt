@@ -1,0 +1,11 @@
+
+Epoch: 0
+Current LR: 0.002
+ Train Stats: Loss: 2.1510 | top1:  22.9167 | top5:  63.0208
+ Valid Stats: Loss: 2.1967 | top1:  18.5600 | top5:  65.3600
+ Test Stats: Loss: 2.1893 | top1:  19.5000 | top5:  65.9800
+Epoch: 0
+Current LR: 0.002
+ Train Stats: Loss: 2.1146 | top1:  25.0000 | top5:  70.3125
+ Valid Stats: Loss: 2.1573 | top1:  21.6800 | top5:  69.3800
+ Test Stats: Loss: 2.1504 | top1:  21.8200 | top5:  69.5300

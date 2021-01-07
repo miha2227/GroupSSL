@@ -1,0 +1,35 @@
+
+Epoch: 0
+ Train Stats: Loss: 2.2696 | top1:  10.9375 | top5:  58.8542
+ Valid Stats: Loss: 2.2816 | top1:  11.3000 | top5:  58.9000
+ Test Stats : Loss: 2.2809 | top1:  11.3200 | top5:  59.0800
+Epoch: 1
+ Train Stats: Loss: 2.6589 | top1:  8.8542 | top5:  64.0625
+ Valid Stats: Loss: 2.6489 | top1:  10.0000 | top5:  62.2000
+ Test Stats : Loss: 2.6456 | top1:  10.0000 | top5:  62.2300
+Epoch: 0
+ Train Stats: Loss: 2.2477 | top1:  23.4375 | top5:  56.7708
+ Valid Stats: Loss: 2.2696 | top1:  21.0800 | top5:  53.9600
+ Test Stats : Loss: 2.2685 | top1:  21.6000 | top5:  54.5300
+Epoch: 1
+ Train Stats: Loss: 2.4812 | top1:  9.3750 | top5:  64.0625
+ Valid Stats: Loss: 2.5403 | top1:  10.0000 | top5:  61.7400
+ Test Stats : Loss: 2.5361 | top1:  10.0000 | top5:  62.1800
+
+Config: 1, epochs: 2
+Hyperparams: {"T_softmax": 17, "num_labeled_per_class": 2, "lambda_u": 86, "lr": 0.07648585194608427}
+Results:
+best_val_acc: 11.3, mean_val_acc: 10.65, best_test_acc: 11.32
+
+Config: 2, epochs: 2
+Hyperparams: {"T_softmax": 48, "num_labeled_per_class": 1, "lambda_u": 93, "lr": 0.0375262275873064}
+Results:
+best_val_acc: 21.08, mean_val_acc: 15.54, best_test_acc: 21.6
+
+Summary:
+==========================
+Search completed for 2 configurations with 2 epochs for each
+Total time taken: 204.8534710407257 seconds
+Best Config_id: 2
+Best Configuration Details: 
+{"T_softmax": 48, "num_labeled_per_class": 1, "lambda_u": 93, "lr": 0.0375262275873064}

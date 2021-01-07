@@ -1,0 +1,891 @@
+[I 2020-12-23 00:44:01,280] A new study created in RDB with name: tune_GroupSSL_60_250_with_pruning_fixed_seed
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+
+Running epoch 2 of 25:
+=====================
+
+Running epoch 3 of 25:
+=====================
+
+Running epoch 4 of 25:
+=====================
+
+Running epoch 5 of 25:
+=====================
+
+Running epoch 6 of 25:
+=====================
+
+Running epoch 7 of 25:
+=====================
+
+Running epoch 8 of 25:
+=====================
+
+Running epoch 9 of 25:
+=====================
+
+Running epoch 10 of 25:
+=====================
+
+Running epoch 11 of 25:
+=====================
+
+Running epoch 12 of 25:
+=====================
+
+Running epoch 13 of 25:
+=====================
+
+Running epoch 14 of 25:
+=====================
+
+Running epoch 15 of 25:
+=====================
+
+Running epoch 16 of 25:
+=====================
+
+Running epoch 17 of 25:
+=====================
+
+Running epoch 18 of 25:
+=====================
+
+Running epoch 19 of 25:
+=====================
+
+Running epoch 20 of 25:
+=====================
+
+Running epoch 21 of 25:
+=====================
+
+Running epoch 22 of 25:
+=====================
+
+Running epoch 23 of 25:
+=====================
+
+Running epoch 24 of 25:
+=====================
+
+Running epoch 25 of 25:
+=====================
+[I 2020-12-23 01:20:53,479] Trial 0 finished with value: 72.42 and parameters: {'T_softmax': 30, 'alpha': 0.7904298026333701, 'lambda_u': 80, 'lr': 0.004953322982405553}. Best is trial 0 with value: 72.42.
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+
+Running epoch 2 of 25:
+=====================
+
+Running epoch 3 of 25:
+=====================
+
+Running epoch 4 of 25:
+=====================
+
+Running epoch 5 of 25:
+=====================
+
+Running epoch 6 of 25:
+=====================
+
+Running epoch 7 of 25:
+=====================
+
+Running epoch 8 of 25:
+=====================
+
+Running epoch 9 of 25:
+=====================
+
+Running epoch 10 of 25:
+=====================
+
+Running epoch 11 of 25:
+=====================
+
+Running epoch 12 of 25:
+=====================
+
+Running epoch 13 of 25:
+=====================
+
+Running epoch 14 of 25:
+=====================
+
+Running epoch 15 of 25:
+=====================
+
+Running epoch 16 of 25:
+=====================
+
+Running epoch 17 of 25:
+=====================
+
+Running epoch 18 of 25:
+=====================
+
+Running epoch 19 of 25:
+=====================
+
+Running epoch 20 of 25:
+=====================
+
+Running epoch 21 of 25:
+=====================
+
+Running epoch 22 of 25:
+=====================
+
+Running epoch 23 of 25:
+=====================
+
+Running epoch 24 of 25:
+=====================
+
+Running epoch 25 of 25:
+=====================
+==> Preparing cifar10
+[I 2020-12-23 01:57:31,187] Trial 2 finished with value: 66.26 and parameters: {'T_softmax': 68, 'alpha': 0.8467374417105182, 'lambda_u': 45, 'lr': 0.03641844392069591}. Best is trial 0 with value: 72.42.
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+
+Running epoch 2 of 25:
+=====================
+
+Running epoch 3 of 25:
+=====================
+
+Running epoch 4 of 25:
+=====================
+
+Running epoch 5 of 25:
+=====================
+
+Running epoch 6 of 25:
+=====================
+
+Running epoch 7 of 25:
+=====================
+
+Running epoch 8 of 25:
+=====================
+
+Running epoch 9 of 25:
+=====================
+
+Running epoch 10 of 25:
+=====================
+
+Running epoch 11 of 25:
+=====================
+
+Running epoch 12 of 25:
+=====================
+
+Running epoch 13 of 25:
+=====================
+
+Running epoch 14 of 25:
+=====================
+
+Running epoch 15 of 25:
+=====================
+
+Running epoch 16 of 25:
+=====================
+
+Running epoch 17 of 25:
+=====================
+
+Running epoch 18 of 25:
+=====================
+
+Running epoch 19 of 25:
+=====================
+
+Running epoch 20 of 25:
+=====================
+
+Running epoch 21 of 25:
+=====================
+
+Running epoch 22 of 25:
+=====================
+
+Running epoch 23 of 25:
+=====================
+
+Running epoch 24 of 25:
+=====================
+
+Running epoch 25 of 25:
+=====================
+==> Preparing cifar10
+[I 2020-12-23 02:34:07,689] Trial 4 finished with value: 70.88 and parameters: {'T_softmax': 69, 'alpha': 0.7747052776976446, 'lambda_u': 60, 'lr': 0.002617321742135292}. Best is trial 0 with value: 72.42.
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+
+Running epoch 2 of 25:
+=====================
+
+Running epoch 3 of 25:
+=====================
+
+Running epoch 4 of 25:
+=====================
+
+Running epoch 5 of 25:
+=====================
+[I 2020-12-23 02:41:27,466] Trial 6 pruned. 
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+[I 2020-12-23 02:42:57,921] Trial 8 pruned. 
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+[I 2020-12-23 02:44:28,307] Trial 9 pruned. 
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+
+Running epoch 2 of 25:
+=====================
+
+Running epoch 3 of 25:
+=====================
+
+Running epoch 4 of 25:
+=====================
+
+Running epoch 5 of 25:
+=====================
+
+Running epoch 6 of 25:
+=====================
+[I 2020-12-23 02:53:17,593] Trial 10 pruned. 
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+
+Running epoch 2 of 25:
+=====================
+
+Running epoch 3 of 25:
+=====================
+
+Running epoch 4 of 25:
+=====================
+
+Running epoch 5 of 25:
+=====================
+
+Running epoch 6 of 25:
+=====================
+
+Running epoch 7 of 25:
+=====================
+
+Running epoch 8 of 25:
+=====================
+
+Running epoch 9 of 25:
+=====================
+
+Running epoch 10 of 25:
+=====================
+
+Running epoch 11 of 25:
+=====================
+
+Running epoch 12 of 25:
+=====================
+
+Running epoch 13 of 25:
+=====================
+
+Running epoch 14 of 25:
+=====================
+
+Running epoch 15 of 25:
+=====================
+
+Running epoch 16 of 25:
+=====================
+
+Running epoch 17 of 25:
+=====================
+
+Running epoch 18 of 25:
+=====================
+
+Running epoch 19 of 25:
+=====================
+
+Running epoch 20 of 25:
+=====================
+
+Running epoch 21 of 25:
+=====================
+
+Running epoch 22 of 25:
+=====================
+
+Running epoch 23 of 25:
+=====================
+
+Running epoch 24 of 25:
+=====================
+
+Running epoch 25 of 25:
+=====================
+[I 2020-12-23 03:29:57,079] Trial 11 finished with value: 71.52 and parameters: {'T_softmax': 20, 'alpha': 0.8151705328030221, 'lambda_u': 85, 'lr': 0.0011514382601955295}. Best is trial 0 with value: 72.42.
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+
+Running epoch 2 of 25:
+=====================
+
+Running epoch 3 of 25:
+=====================
+
+Running epoch 4 of 25:
+=====================
+
+Running epoch 5 of 25:
+=====================
+
+Running epoch 6 of 25:
+=====================
+
+Running epoch 7 of 25:
+=====================
+
+Running epoch 8 of 25:
+=====================
+
+Running epoch 9 of 25:
+=====================
+
+Running epoch 10 of 25:
+=====================
+
+
+Running epoch 11 of 25:
+=====================
+
+Running epoch 12 of 25:
+=====================
+
+Running epoch 13 of 25:
+=====================
+
+Running epoch 14 of 25:
+=====================
+[I 2020-12-23 03:50:47,160] Trial 13 pruned. 
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+
+Running epoch 2 of 25:
+=====================
+
+Running epoch 3 of 25:
+=====================
+
+Running epoch 4 of 25:
+=====================
+
+Running epoch 5 of 25:
+=====================
+
+Running epoch 6 of 25:
+=====================
+
+Running epoch 7 of 25:
+=====================
+
+Running epoch 8 of 25:
+=====================
+
+Running epoch 9 of 25:
+=====================
+
+Running epoch 10 of 25:
+=====================
+
+Running epoch 11 of 25:
+=====================
+
+Running epoch 12 of 25:
+=====================
+
+Running epoch 13 of 25:
+=====================
+
+Running epoch 14 of 25:
+=====================
+
+Running epoch 15 of 25:
+=====================
+
+Running epoch 16 of 25:
+=====================
+
+Running epoch 17 of 25:
+=====================
+
+Running epoch 18 of 25:
+=====================
+
+Running epoch 19 of 25:
+=====================
+
+Running epoch 20 of 25:
+=====================
+[I 2020-12-23 04:20:08,028] Trial 15 pruned. 
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+[I 2020-12-23 04:21:38,562] Trial 17 pruned. 
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+
+Running epoch 2 of 25:
+=====================
+
+Running epoch 3 of 25:
+=====================
+
+Running epoch 4 of 25:
+=====================
+
+Running epoch 5 of 25:
+=====================
+
+Running epoch 6 of 25:
+=====================
+
+Running epoch 7 of 25:
+=====================
+[I 2020-12-23 04:31:54,402] Trial 18 pruned. 
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+[I 2020-12-23 04:33:24,858] Trial 20 pruned. 
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+[I 2020-12-23 04:34:53,474] Trial 21 pruned. 
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+
+Running epoch 2 of 25:
+=====================
+
+Running epoch 3 of 25:
+=====================
+
+Running epoch 4 of 25:
+=====================
+[I 2020-12-23 04:40:45,454] Trial 23 pruned. 
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+
+Running epoch 2 of 25:
+=====================
+
+Running epoch 3 of 25:
+=====================
+
+Running epoch 4 of 25:
+=====================
+
+Running epoch 5 of 25:
+=====================
+
+Running epoch 6 of 25:
+=====================
+
+Running epoch 7 of 25:
+=====================
+
+Running epoch 8 of 25:
+=====================
+
+Running epoch 9 of 25:
+=====================
+
+Running epoch 10 of 25:
+=====================
+
+Running epoch 11 of 25:
+=====================
+
+Running epoch 12 of 25:
+=====================
+
+Running epoch 13 of 25:
+=====================
+
+Running epoch 14 of 25:
+=====================
+[I 2020-12-23 05:01:17,308] Trial 25 pruned. 
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+
+Running epoch 2 of 25:
+=====================
+[I 2020-12-23 05:04:15,651] Trial 26 pruned. 
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+[I 2020-12-23 05:05:46,118] Trial 27 pruned. 
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+
+Running epoch 2 of 25:
+=====================
+
+Running epoch 3 of 25:
+=====================
+[I 2020-12-23 05:10:12,097] Trial 28 pruned. 
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+[I 2020-12-23 05:11:42,674] Trial 29 pruned. 
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+
+Running epoch 2 of 25:
+=====================
+
+Running epoch 3 of 25:
+=====================
+
+Running epoch 4 of 25:
+=====================
+
+Running epoch 5 of 25:
+=====================
+
+Running epoch 6 of 25:
+=====================
+
+Running epoch 7 of 25:
+=====================
+
+Running epoch 8 of 25:
+=====================
+
+Running epoch 9 of 25:
+=====================
+
+Running epoch 10 of 25:
+=====================
+
+Running epoch 11 of 25:
+=====================
+
+Running epoch 12 of 25:
+=====================
+
+Running epoch 13 of 25:
+=====================
+
+Running epoch 14 of 25:
+=====================
+
+Running epoch 15 of 25:
+=====================
+
+Running epoch 16 of 25:
+=====================
+
+Running epoch 17 of 25:
+=====================
+
+Running epoch 18 of 25:
+=====================
+
+Running epoch 19 of 25:
+=====================
+
+Running epoch 20 of 25:
+=====================
+
+Running epoch 21 of 25:
+=====================
+
+Running epoch 22 of 25:
+=====================
+
+Running epoch 23 of 25:
+=====================
+
+Running epoch 24 of 25:
+=====================
+
+Running epoch 25 of 25:
+=====================
+[I 2020-12-23 05:48:04,841] Trial 30 finished with value: 72.82 and parameters: {'T_softmax': 20, 'alpha': 0.851409233224262, 'lambda_u': 100, 'lr': 0.006506114771075953}. Best is trial 16 with value: 73.28.
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+
+Running epoch 2 of 25:
+=====================
+[I 2020-12-23 05:51:01,493] Trial 40 pruned. 
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+
+Running epoch 2 of 25:
+=====================
+
+Running epoch 3 of 25:
+=====================
+[I 2020-12-23 05:55:25,890] Trial 42 pruned. 
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+[I 2020-12-23 05:56:56,480] Trial 44 pruned. 
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+
+Running epoch 2 of 25:
+=====================
+
+Running epoch 3 of 25:
+=====================
+
+Running epoch 4 of 25:
+=====================
+[I 2020-12-23 06:02:48,559] Trial 45 pruned. 
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+[I 2020-12-23 06:04:19,163] Trial 47 pruned. 
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+[I 2020-12-23 06:05:49,632] Trial 48 pruned. 
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+
+Running epoch 2 of 25:
+=====================
+[I 2020-12-23 06:08:44,433] Trial 49 pruned. 
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+
+Running epoch 2 of 25:
+=====================
+[I 2020-12-23 06:11:40,814] Trial 52 pruned. 
+==> Preparing cifar10
+Files already downloaded and verified
+Files already downloaded and verified
+Files already downloaded and verified
+#Labeled: 250 #Unlabeled: 44750 #Val: 5000
+==> creating WRN-28-2
+
+Running epoch 1 of 25:
+=====================
+[I 2020-12-23 06:13:11,354] Trial 54 pruned. 
+
+Best objective value: 73.28
+
+Best trial: FrozenTrial(number=16, value=73.28, datetime_start=datetime.datetime(2020, 12, 23, 3, 54, 25, 303753), datetime_complete=datetime.datetime(2020, 12, 23, 4, 31, 10, 373973), params={'T_softmax': 21, 'alpha': 0.7926873527247059, 'lambda_u': 74, 'lr': 0.002120459749807178}, distributions={'T_softmax': IntUniformDistribution(high=100, low=20, step=1), 'alpha': UniformDistribution(high=0.9, low=0.7), 'lambda_u': IntUniformDistribution(high=105, low=35, step=1), 'lr': UniformDistribution(high=0.05, low=0.001)}, user_attrs={}, system_attrs={}, intermediate_values={0: 17.04, 1: 31.38, 2: 44.12, 3: 50.1, 4: 52.76, 5: 54.44, 6: 57.14, 7: 58.98, 8: 60.42, 9: 62.26, 10: 63.76, 11: 64.48, 12: 65.92, 13: 67.16, 14: 67.46, 15: 68.68, 16: 69.16, 17: 70.08, 18: 71.16, 19: 71.74, 20: 71.84, 21: 72.04, 22: 72.22, 23: 72.74, 24: 73.28}, trial_id=17, state=TrialState.COMPLETE)
+
+
+Best parameter value: {'T_softmax': 21, 'alpha': 0.7926873527247059, 'lambda_u': 74, 'lr': 0.002120459749807178}

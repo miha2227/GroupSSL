@@ -1,0 +1,46 @@
+Execution triggered at: 2021-01-05,15:23:44
+
+Experiment Configuration:
+========================
+Namespace(K=2, T=0.5, T_softmax=10, alpha=0.75, batch_size=64, ema_decay=0.999, epochs=10, gpu='0', lambda_u=75, lr=0.002, manualSeed=0, n_labeled=250, num_labeled_per_class=2, out='gl_jsd_wm_test_exp_1', resume='', scaling_loss=1.0, start_epoch=0, train_iteration=1024)
+==============================================================
+
+
+Epoch: 0
+ Train Stats: Loss: 2.0371 | top1:  29.6875 | top5:  81.2500
+ Test Stats: Loss: 2.4618 | top1:  19.4300 | top5:  70.2800
+Epoch: 1
+ Train Stats: Loss: 1.4854 | top1:  50.0000 | top5:  96.8750
+ Test Stats: Loss: 2.0149 | top1:  27.9000 | top5:  78.1000
+Epoch: 2
+ Train Stats: Loss: 0.3808 | top1:  97.9167 | top5:  100.0000
+ Test Stats: Loss: 1.8514 | top1:  39.5000 | top5:  85.6400
+Epoch: 3
+ Train Stats: Loss: 0.0201 | top1:  100.0000 | top5:  100.0000
+ Test Stats: Loss: 1.9930 | top1:  42.8500 | top5:  86.5300
+Epoch: 4
+ Train Stats: Loss: 0.0035 | top1:  100.0000 | top5:  100.0000
+ Test Stats: Loss: 2.2428 | top1:  44.1400 | top5:  86.9700
+Epoch: 5
+ Train Stats: Loss: 0.0014 | top1:  100.0000 | top5:  100.0000
+ Test Stats: Loss: 2.3703 | top1:  45.7200 | top5:  88.5200
+Epoch: 6
+ Train Stats: Loss: 0.0010 | top1:  100.0000 | top5:  100.0000
+ Test Stats: Loss: 2.3761 | top1:  46.0600 | top5:  89.0000
+Epoch: 7
+ Train Stats: Loss: 0.0010 | top1:  100.0000 | top5:  100.0000
+ Test Stats: Loss: 2.3429 | top1:  46.6800 | top5:  88.6700
+Epoch: 8
+ Train Stats: Loss: 0.0010 | top1:  100.0000 | top5:  100.0000
+ Test Stats: Loss: 2.3600 | top1:  46.9100 | top5:  88.9400
+Epoch: 9
+ Train Stats: Loss: 0.0014 | top1:  100.0000 | top5:  100.0000
+ Test Stats: Loss: 2.3348 | top1:  48.3100 | top5:  89.0200
+
+Summary Results:
+======================
+ Best val acc:  46.7400 
+ Mean val acc:  40.1360 
+ Best test acc:  48.3100
+
+Execution finished at: 2021-01-05,15:41:32
