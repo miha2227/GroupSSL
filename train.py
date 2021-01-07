@@ -153,7 +153,8 @@ def main(args, use_cuda):
 
     device = 'cuda:0'
     nb_classes = 10  # number of classes in CIFAR-10 - move it to dataset class!
-    gtg = GTG(nb_classes, max_iter=args.num_labeled_per_class, device=device).to(device)
+    gtg = GTG(nb_classes, max_iter=args.num_labeled_per_class, device=device).to(
+        device)  # todo: ask why max iter is number of labled per class?
 
     cudnn.benchmark = True
     print('    Total params: %.2fM' % (sum(p.numel() for p in model.parameters()) / 1000000.0))
@@ -246,7 +247,7 @@ def main(args, use_cuda):
     # mean_test_acc = np.mean(test_accs[-20:])
     print('Mean val acc: {}'.format(mean_val_acc))
     print('Best test acc: {}'.format(best_t_acc))
-    with open('{}_log.txt'.format(args.out), 'a') as f:
+    with open(os.path.join(args.out, 'experiment_detail_log.txt'), 'a') as f:
         f.write(
             '\n Best val acc: {best_acc: .4f} \n Mean val acc: {mean_val_acc: .4f} \n Best test acc: {best_t_acc: .4f}'.format(
                 best_acc=best_acc,
@@ -259,8 +260,7 @@ def main(args, use_cuda):
 def train(labeled_trainloader, unlabeled_trainloader, model,
           optimizer, ema_optimizer, criterion,
           gtg, criterion_gl, loss_func,
-          epoch, use_cuda, args, log_enabled=True):
-
+          epoch, use_cuda, args, lr_scheduler=None, log_enabled=True, isCyclicLRScheduler=False):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
@@ -276,16 +276,20 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
     unlabeled_train_iter = iter(unlabeled_trainloader)
 
     if log_enabled:
-        with open('{}_log.txt'.format(args.out), 'a') as f:
+        with open(os.path.join(args.out, 'experiment_detail_log.txt'), 'a') as f:
             f.write('\nEpoch: {}'.format(epoch))
+            if lr_scheduler:
+                f.write('\nCurrent LR: {}'.format(optimizer.param_groups[0]['lr']))
 
     model.train()
     for batch_idx in range(args.train_iteration):
+        if lr_scheduler and batch_idx % 128 == 0:  # debug
+            print('LR from train method: {}'.format(optimizer.param_groups[0]['lr']))  # debug
         try:
             inputs_x, targets_int = labeled_train_iter.next()
         except:
             labeled_train_iter = iter(labeled_trainloader)
-            inputs_x, targets_x = labeled_train_iter.next()
+            inputs_x, targets_int = labeled_train_iter.next()
 
         try:
             (inputs_u, inputs_u2), _ = unlabeled_train_iter.next()
@@ -376,6 +380,9 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
         batch_time.update(time.time() - end)
         end = time.time()
 
+        if lr_scheduler and isCyclicLRScheduler:  # learning rate scheduling (Use it after every batch only for Cyclic or OneCycle scheduler)
+            lr_scheduler.step()
+
         # plot progress
         bar.suffix = '({batch}/{size}) Data: {data:.3f}s | Batch: {bt:.3f}s | Total: {total:} | ETA: {eta:} | Loss: {loss:.4f} | Loss_x: {loss_x:.4f} | Loss_u: {loss_u:.4f} | W: {w:.4f}'.format(
             batch=batch_idx + 1,
@@ -390,6 +397,7 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
             w=ws.avg,
         )
         bar.next()
+
     bar.finish()
 
     return losses.avg, losses_x.avg, losses_x_nll.avg, losses_x_ce.avg, losses_u.avg
@@ -444,7 +452,7 @@ def validate(valloader, model, criterion, epoch, use_cuda, mode, args=None, log_
         bar.finish()
 
         if log_enabled:
-            with open('{}_log.txt'.format(args.out), 'a') as f:
+            with open(os.path.join(args.out, 'experiment_detail_log.txt'), 'a') as f:
                 f.write('\n {mode}: Loss: {loss:.4f} | top1: {top1: .4f} | top5: {top5: .4f}'.format(
                     mode=mode,
                     loss=losses.avg,
@@ -532,10 +540,13 @@ class WeightEMA(object):
         self.alpha = alpha
         self.params = list(model.state_dict().values())
         self.ema_params = list(ema_model.state_dict().values())
-        self.wd = 0.02 * 0.002  # args.lr
+        self.wd = 0.02 * args.lr
 
         for param, ema_param in zip(self.params, self.ema_params):
             param.data.copy_(ema_param.data)
+
+    def set_LR(self, LR):  # to be used for learning rate scheduling
+        self.wd = 0.02 * LR
 
     def step(self):
         one_minus_alpha = 1.0 - self.alpha
