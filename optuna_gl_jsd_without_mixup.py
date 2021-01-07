@@ -32,7 +32,7 @@ def objective(trial):
     # best_val_acc, _, _ = main(logEnabled=False, args=args, isOptuna=True)
     epoch = args.start_epoch
     best_val_acc = 0
-    for output in main(logEnabled=False, args=args, isOptuna=True):
+    for output in main(logEnabled=False, args=args, isOptuna=True):  # Please Note: Uncomment the yield statement in main() method of train_gl_jsd_without_mixup before running this script
         best_val_acc, _, _ = output
         # report for pruning
         trial.report(best_val_acc, epoch)
