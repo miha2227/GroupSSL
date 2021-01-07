@@ -7,6 +7,8 @@ import torch
 import errno
 import os
 import numpy as np
+import torch.backends.cudnn as cudnn
+import random
 import sys
 import time
 import math
@@ -61,7 +63,7 @@ def mkdir_p(path):
             raise
 
 
-def get_labeled_and_unlabeled_points(labels, num_points_per_class, num_classes=100):
+def get_labeled_and_unlabeled_points(labels, num_points_per_class, num_classes=100):  # there is a duplicate of this method in data_util with name get_anchor_and_nonanchor_points
     labs, L, U = [], [], []
     labs_buffer = np.zeros(num_classes)
     num_points = labels.shape[0]
@@ -73,6 +75,32 @@ def get_labeled_and_unlabeled_points(labels, num_points_per_class, num_classes=1
             labs.append(labels[i])
             labs_buffer[labels[i]] += 1
     return labs, L, U
+
+
+def setup_device():
+    use_cuda = torch.cuda.is_available()
+    if use_cuda:
+        device = 'cuda:0'
+        cudnn.benchmark = True
+    else:
+        device = 'cpu'
+        cudnn.benchmark = False
+    return device, use_cuda
+
+
+def setup_random_seed(seed):
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+
+
+def unset_random_seed():
+    seed = None
+    # torch.manual_seed(seed)
+    # torch.cuda.manual_seed(seed)
+    np.random.seed(seed)
+    random.seed(seed)
 
 
 class AverageMeter(object):

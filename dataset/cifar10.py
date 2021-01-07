@@ -4,6 +4,18 @@ from PIL import Image
 import torchvision
 import torch
 
+
+class Augment_n:  # augments the input image n times and returns all n augmented versions of the image
+    def __init__(self, transform, number_of_augmentations=2):
+        self.transform = transform
+        self.n_augmentations = number_of_augmentations
+
+    def __call__(self, inp):
+        out = []
+        for i in range(self.n_augmentations):
+            out.append(self.transform(inp))
+        return tuple(out)
+
 class TransformTwice:
     def __init__(self, transform):
         self.transform = transform
@@ -13,21 +25,20 @@ class TransformTwice:
         out2 = self.transform(inp)
         return out1, out2
 
-def get_cifar10(root, n_labeled,
-                 transform_train=None, transform_val=None,
-                 download=True):
+
+def get_cifar10(root, n_labeled, transform_train=None, transform_val=None, n_augment_unlabeled=2, download=True):
 
     base_dataset = torchvision.datasets.CIFAR10(root, train=True, download=download)
     train_labeled_idxs, train_unlabeled_idxs, val_idxs = train_val_split(base_dataset.targets, int(n_labeled/10))
 
     train_labeled_dataset = CIFAR10_labeled(root, train_labeled_idxs, train=True, transform=transform_train)
-    train_unlabeled_dataset = CIFAR10_unlabeled(root, train_unlabeled_idxs, train=True, transform=TransformTwice(transform_train))
+    train_unlabeled_dataset = CIFAR10_unlabeled(root, train_unlabeled_idxs, train=True, transform=Augment_n(transform_train, n_augment_unlabeled))
     val_dataset = CIFAR10_labeled(root, val_idxs, train=True, transform=transform_val, download=True)
     test_dataset = CIFAR10_labeled(root, train=False, transform=transform_val, download=True)
 
     print (f"#Labeled: {len(train_labeled_idxs)} #Unlabeled: {len(train_unlabeled_idxs)} #Val: {len(val_idxs)}")
     return train_labeled_dataset, train_unlabeled_dataset, val_dataset, test_dataset
-    
+
 
 def train_val_split(labels, n_labeled_per_class):
     labels = np.array(labels)
@@ -60,7 +71,7 @@ def normalise(x, mean=cifar10_mean, std=cifar10_std):
 
 
 def transpose(x, source='NHWC', target='NCHW'):
-    return x.transpose([source.index(d) for d in target]) 
+    return x.transpose([source.index(d) for d in target])
 
 
 def pad(x, border=4):
@@ -154,7 +165,7 @@ class CIFAR10_labeled(torchvision.datasets.CIFAR10):
             target = self.target_transform(target)
 
         return img, target
-    
+
 
 class CIFAR10_unlabeled(CIFAR10_labeled):
 
@@ -165,4 +176,3 @@ class CIFAR10_unlabeled(CIFAR10_labeled):
                  transform=transform, target_transform=target_transform,
                  download=download)
         self.targets = np.array([-1 for i in range(len(self.targets))])
-        
