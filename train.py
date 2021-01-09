@@ -27,6 +27,19 @@ from group_loss.gtg import GTG
 from utils.misc import get_labeled_and_unlabeled_points
 
 
+# define "soft" cross-entropy with pytorch tensor operations
+# taken from: https://discuss.pytorch.org/t/soft-cross-entropy-loss-tf-has-it-does-pytorch-have-it/69501/2
+def softXEnt(input, target):
+    logprobs = torch.nn.functional.log_softmax (input, dim = 1)
+    return  -(target * logprobs).sum() / input.shape[0]
+
+
+# define "soft" NLL with pytorch tensor operations
+# taken from: https://discuss.pytorch.org/t/loss-function-for-floating-targets/88847/3
+def softNLL(input, target):
+    return  -(target * input).sum() / input.shape[0]
+
+
 def setup_random_seed(seed):
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
