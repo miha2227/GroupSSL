@@ -1,0 +1,517 @@
+Execution triggered at: 2021-01-11,03:59:07
+
+Experiment Configuration:
+========================
+Namespace(T=0.6289668058883104, T_softmax=57.0, alpha=0.75, batch_size=64, ema_decay=0.999, epochs=100, gpu='0', lambda_u=75, lr=0.004913416748818501, manualSeed=0, max_iter_gtg=2, n_labeled=250, num_labeled_per_class=3, out='groupssl_cifar10_250@SOFT_LABELS_TUNED_BEST_HYPERPARMS_LR_DECAY_AFTER_50_min_lr_0', resume='', start_epoch=0, train_iteration=1024)
+
+Epochs:
+==============================
+
+Epoch: 0
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 2.0952 | top1:  30.2083 | top5:  65.1042
+ Valid Stats: Loss: 2.1926 | top1:  20.9800 | top5:  65.9400
+ Test Stats: Loss: 2.1846 | top1:  22.0200 | top5:  66.2900
+Epoch: 1
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.6643 | top1:  94.2708 | top5:  100.0000
+ Valid Stats: Loss: 1.7468 | top1:  38.6800 | top5:  87.8200
+ Test Stats: Loss: 1.7423 | top1:  39.0500 | top5:  87.7300
+Epoch: 2
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.1241 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 1.4392 | top1:  51.4000 | top5:  91.5600
+ Test Stats: Loss: 1.4432 | top1:  51.3900 | top5:  92.0900
+Epoch: 3
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0737 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 1.3450 | top1:  55.3600 | top5:  92.0000
+ Test Stats: Loss: 1.3531 | top1:  54.5100 | top5:  92.2400
+Epoch: 4
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0714 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 1.2870 | top1:  57.4400 | top5:  92.4200
+ Test Stats: Loss: 1.2938 | top1:  56.9900 | top5:  92.5900
+Epoch: 5
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0774 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 1.2429 | top1:  59.4000 | top5:  93.0600
+ Test Stats: Loss: 1.2492 | top1:  58.8500 | top5:  92.8700
+Epoch: 6
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0815 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 1.2055 | top1:  60.4000 | top5:  93.1000
+ Test Stats: Loss: 1.2180 | top1:  60.3900 | top5:  92.6600
+Epoch: 7
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0819 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 1.1877 | top1:  62.0600 | top5:  93.3800
+ Test Stats: Loss: 1.2008 | top1:  61.1500 | top5:  92.7000
+Epoch: 8
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0864 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 1.1658 | top1:  63.0400 | top5:  93.5800
+ Test Stats: Loss: 1.1790 | top1:  62.1200 | top5:  93.2500
+Epoch: 9
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0851 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 1.1555 | top1:  63.0200 | top5:  94.0400
+ Test Stats: Loss: 1.1709 | top1:  62.6900 | top5:  93.8100
+Epoch: 10
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0817 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 1.1931 | top1:  62.4800 | top5:  93.7000
+ Test Stats: Loss: 1.2101 | top1:  62.4200 | top5:  93.4400
+Epoch: 11
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0781 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 1.1606 | top1:  63.7600 | top5:  94.3400
+ Test Stats: Loss: 1.1829 | top1:  63.0400 | top5:  93.9000
+Epoch: 12
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0732 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 1.1332 | top1:  64.7200 | top5:  94.5800
+ Test Stats: Loss: 1.1610 | top1:  63.9200 | top5:  94.2900
+Epoch: 13
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0708 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 1.1078 | top1:  66.2200 | top5:  94.9000
+ Test Stats: Loss: 1.1368 | top1:  65.1100 | top5:  94.4400
+Epoch: 14
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0617 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 1.0732 | top1:  66.9000 | top5:  95.6000
+ Test Stats: Loss: 1.1017 | top1:  66.1900 | top5:  95.2300
+Epoch: 15
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0676 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 1.0185 | top1:  68.6000 | top5:  95.6400
+ Test Stats: Loss: 1.0407 | top1:  67.9700 | top5:  95.2500
+Epoch: 16
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0659 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.9868 | top1:  69.8600 | top5:  95.8200
+ Test Stats: Loss: 1.0050 | top1:  69.4600 | top5:  95.6000
+Epoch: 17
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0652 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.9866 | top1:  70.2000 | top5:  95.4000
+ Test Stats: Loss: 1.0079 | top1:  69.8100 | top5:  95.4000
+Epoch: 18
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0672 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.9777 | top1:  70.4800 | top5:  95.9800
+ Test Stats: Loss: 1.0046 | top1:  70.0100 | top5:  95.8600
+Epoch: 19
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0635 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.9668 | top1:  70.9600 | top5:  95.8200
+ Test Stats: Loss: 0.9945 | top1:  70.4400 | top5:  95.9400
+Epoch: 20
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0653 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.9574 | top1:  72.0400 | top5:  95.4400
+ Test Stats: Loss: 0.9867 | top1:  70.7900 | top5:  95.6000
+Epoch: 21
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0641 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.9706 | top1:  71.6600 | top5:  95.7000
+ Test Stats: Loss: 0.9934 | top1:  70.7200 | top5:  95.7400
+Epoch: 22
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0714 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.9714 | top1:  71.7000 | top5:  95.6200
+ Test Stats: Loss: 0.9936 | top1:  70.8300 | top5:  95.7600
+Epoch: 23
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0673 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.9640 | top1:  72.0600 | top5:  96.1000
+ Test Stats: Loss: 0.9858 | top1:  71.3500 | top5:  95.8700
+Epoch: 24
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0671 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.9529 | top1:  72.2200 | top5:  95.8800
+ Test Stats: Loss: 0.9762 | top1:  71.6100 | top5:  95.7400
+Epoch: 25
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0676 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.9440 | top1:  72.8600 | top5:  95.9600
+ Test Stats: Loss: 0.9622 | top1:  72.2500 | top5:  95.7600
+Epoch: 26
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0672 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.9257 | top1:  73.1600 | top5:  96.1600
+ Test Stats: Loss: 0.9420 | top1:  73.0400 | top5:  96.3200
+Epoch: 27
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0722 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.9303 | top1:  73.1400 | top5:  96.0000
+ Test Stats: Loss: 0.9495 | top1:  73.1600 | top5:  96.1000
+Epoch: 28
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0729 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.9288 | top1:  73.2800 | top5:  96.2200
+ Test Stats: Loss: 0.9532 | top1:  73.0000 | top5:  96.1300
+Epoch: 29
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0717 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.9345 | top1:  73.5000 | top5:  96.0800
+ Test Stats: Loss: 0.9588 | top1:  72.8300 | top5:  96.0100
+Epoch: 30
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0739 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.9241 | top1:  73.4800 | top5:  96.0400
+ Test Stats: Loss: 0.9474 | top1:  73.1700 | top5:  95.7800
+Epoch: 31
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0700 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.9130 | top1:  74.0800 | top5:  95.7000
+ Test Stats: Loss: 0.9317 | top1:  73.5200 | top5:  95.9400
+Epoch: 32
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0713 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.9062 | top1:  74.6600 | top5:  95.8000
+ Test Stats: Loss: 0.9232 | top1:  73.7300 | top5:  95.9600
+Epoch: 33
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0690 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.8949 | top1:  74.7200 | top5:  96.0600
+ Test Stats: Loss: 0.9135 | top1:  74.1900 | top5:  96.1100
+Epoch: 34
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0772 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.8832 | top1:  74.9400 | top5:  95.9200
+ Test Stats: Loss: 0.9052 | top1:  74.5600 | top5:  95.9100
+Epoch: 35
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0741 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.8691 | top1:  75.3600 | top5:  96.3800
+ Test Stats: Loss: 0.8926 | top1:  74.8100 | top5:  96.0500
+Epoch: 36
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0753 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.8663 | top1:  75.0600 | top5:  96.3400
+ Test Stats: Loss: 0.8905 | top1:  75.0600 | top5:  96.2500
+Epoch: 37
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0735 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.8687 | top1:  75.5600 | top5:  96.2400
+ Test Stats: Loss: 0.9007 | top1:  75.0800 | top5:  95.9600
+Epoch: 38
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0741 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.8726 | top1:  75.7600 | top5:  96.2000
+ Test Stats: Loss: 0.9018 | top1:  75.0700 | top5:  95.8900
+Epoch: 39
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0775 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.8521 | top1:  75.8200 | top5:  96.5800
+ Test Stats: Loss: 0.8756 | top1:  75.4300 | top5:  96.2800
+Epoch: 40
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0757 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.8584 | top1:  76.2000 | top5:  96.5000
+ Test Stats: Loss: 0.8809 | top1:  75.0400 | top5:  96.4100
+Epoch: 41
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0771 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.8789 | top1:  76.0000 | top5:  95.8800
+ Test Stats: Loss: 0.9012 | top1:  75.0100 | top5:  96.0600
+Epoch: 42
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0728 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.8588 | top1:  76.6000 | top5:  96.0200
+ Test Stats: Loss: 0.8872 | top1:  75.3900 | top5:  96.1200
+Epoch: 43
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0755 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.8394 | top1:  76.4400 | top5:  96.5000
+ Test Stats: Loss: 0.8642 | top1:  76.0700 | top5:  96.4300
+Epoch: 44
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0732 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.8302 | top1:  76.8200 | top5:  96.6200
+ Test Stats: Loss: 0.8563 | top1:  75.9400 | top5:  96.4700
+Epoch: 45
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0761 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.8187 | top1:  77.1000 | top5:  96.5600
+ Test Stats: Loss: 0.8469 | top1:  76.3000 | top5:  96.4200
+Epoch: 46
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0738 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.8073 | top1:  77.5800 | top5:  96.5800
+ Test Stats: Loss: 0.8352 | top1:  76.6000 | top5:  96.4300
+Epoch: 47
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0774 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.8021 | top1:  77.5800 | top5:  96.6200
+ Test Stats: Loss: 0.8312 | top1:  76.5200 | top5:  96.4700
+Epoch: 48
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0746 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.7961 | top1:  78.0000 | top5:  96.5800
+ Test Stats: Loss: 0.8287 | top1:  76.9800 | top5:  96.3300
+Epoch: 49
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0771 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.7922 | top1:  78.0800 | top5:  96.6200
+ Test Stats: Loss: 0.8263 | top1:  77.0900 | top5:  96.4200
+Epoch: 50
+Current LR: 0.004913416748818501
+ Train Stats: Loss: 0.0771 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.7804 | top1:  78.4800 | top5:  96.7000
+ Test Stats: Loss: 0.8187 | top1:  77.2600 | top5:  96.5700
+Epoch: 51
+Current LR: 0.00490856899602326
+ Train Stats: Loss: 0.0806 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.7801 | top1:  78.3800 | top5:  96.6200
+ Test Stats: Loss: 0.8214 | top1:  76.9200 | top5:  96.4800
+Epoch: 52
+Current LR: 0.004894044869503064
+ Train Stats: Loss: 0.0768 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.7619 | top1:  79.1600 | top5:  96.7400
+ Test Stats: Loss: 0.7973 | top1:  77.4900 | top5:  96.5700
+Epoch: 53
+Current LR: 0.004869901689349843
+ Train Stats: Loss: 0.0806 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.7640 | top1:  78.9400 | top5:  96.7800
+ Test Stats: Loss: 0.8011 | top1:  77.5800 | top5:  96.7500
+Epoch: 54
+Current LR: 0.004836234737665719
+ Train Stats: Loss: 0.0772 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.7632 | top1:  78.6000 | top5:  96.7000
+ Test Stats: Loss: 0.7917 | top1:  78.1300 | top5:  96.5600
+Epoch: 55
+Current LR: 0.0047931768825280295
+ Train Stats: Loss: 0.0799 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.7562 | top1:  78.8400 | top5:  96.7400
+ Test Stats: Loss: 0.7864 | top1:  77.9500 | top5:  96.6400
+Epoch: 56
+Current LR: 0.004740898053619728
+ Train Stats: Loss: 0.0812 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.7541 | top1:  78.7800 | top5:  96.9000
+ Test Stats: Loss: 0.7801 | top1:  77.7500 | top5:  96.8500
+Epoch: 57
+Current LR: 0.004679604571594576
+ Train Stats: Loss: 0.0819 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.7552 | top1:  78.9200 | top5:  96.8000
+ Test Stats: Loss: 0.7808 | top1:  77.9000 | top5:  96.7700
+Epoch: 58
+Current LR: 0.004609538333823794
+ Train Stats: Loss: 0.0839 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.7317 | top1:  79.5800 | top5:  97.1400
+ Test Stats: Loss: 0.7579 | top1:  78.5900 | top5:  97.0800
+Epoch: 59
+Current LR: 0.00453097585973764
+ Train Stats: Loss: 0.0832 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.7472 | top1:  79.1600 | top5:  96.9800
+ Test Stats: Loss: 0.7693 | top1:  78.2000 | top5:  97.0000
+Epoch: 60
+Current LR: 0.004444227199529587
+ Train Stats: Loss: 0.0792 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.7522 | top1:  79.0000 | top5:  97.0800
+ Test Stats: Loss: 0.7777 | top1:  77.9800 | top5:  96.6900
+Epoch: 61
+Current LR: 0.00434963471052975
+ Train Stats: Loss: 0.0865 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.7355 | top1:  79.3000 | top5:  97.0600
+ Test Stats: Loss: 0.7603 | top1:  78.3500 | top5:  97.0200
+Epoch: 62
+Current LR: 0.004247571706077049
+ Train Stats: Loss: 0.0837 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.7218 | top1:  79.9000 | top5:  97.1200
+ Test Stats: Loss: 0.7474 | top1:  79.3300 | top5:  96.7300
+Epoch: 63
+Current LR: 0.00413844098222187
+ Train Stats: Loss: 0.0807 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.7222 | top1:  80.2000 | top5:  97.0600
+ Test Stats: Loss: 0.7479 | top1:  79.3200 | top5:  96.8400
+Epoch: 64
+Current LR: 0.004022673228074211
+ Train Stats: Loss: 0.0806 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.7018 | top1:  80.4200 | top5:  97.3600
+ Test Stats: Loss: 0.7264 | top1:  79.4700 | top5:  97.1200
+Epoch: 65
+Current LR: 0.0039007253260704257
+ Train Stats: Loss: 0.0837 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6878 | top1:  80.6800 | top5:  97.2800
+ Test Stats: Loss: 0.7147 | top1:  79.8200 | top5:  97.1600
+Epoch: 66
+Current LR: 0.0037730785488670196
+ Train Stats: Loss: 0.0868 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6932 | top1:  80.7000 | top5:  97.2800
+ Test Stats: Loss: 0.7235 | top1:  79.6800 | top5:  97.1000
+Epoch: 67
+Current LR: 0.0036402366599773573
+ Train Stats: Loss: 0.0877 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6954 | top1:  80.6600 | top5:  97.2000
+ Test Stats: Loss: 0.7241 | top1:  79.7900 | top5:  97.1100
+Epoch: 68
+Current LR: 0.0035027239256472005
+ Train Stats: Loss: 0.0875 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.7015 | top1:  80.6800 | top5:  97.1200
+ Test Stats: Loss: 0.7247 | top1:  79.6700 | top5:  97.0900
+Epoch: 69
+Current LR: 0.0033610830458153645
+ Train Stats: Loss: 0.0828 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.7002 | top1:  80.6200 | top5:  97.1400
+ Test Stats: Loss: 0.7263 | top1:  79.9600 | top5:  97.1500
+Epoch: 70
+Current LR: 0.0032158730123249624
+ Train Stats: Loss: 0.0889 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.7098 | top1:  80.6400 | top5:  96.8000
+ Test Stats: Loss: 0.7405 | top1:  79.4500 | top5:  96.8000
+Epoch: 71
+Current LR: 0.003067666902838035
+ Train Stats: Loss: 0.0855 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6991 | top1:  80.9000 | top5:  97.0200
+ Test Stats: Loss: 0.7235 | top1:  79.9700 | top5:  96.9400
+Epoch: 72
+Current LR: 0.0029170496191598056
+ Train Stats: Loss: 0.0866 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6844 | top1:  81.4200 | top5:  97.2600
+ Test Stats: Loss: 0.7123 | top1:  80.5800 | top5:  97.2100
+Epoch: 73
+Current LR: 0.002764615578898466
+ Train Stats: Loss: 0.0877 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6779 | top1:  81.3600 | top5:  97.1200
+ Test Stats: Loss: 0.7037 | top1:  80.6700 | top5:  97.2300
+Epoch: 74
+Current LR: 0.002610966369570419
+ Train Stats: Loss: 0.0871 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6702 | top1:  81.7600 | top5:  97.3000
+ Test Stats: Loss: 0.6948 | top1:  80.7100 | top5:  97.3100
+Epoch: 75
+Current LR: 0.002456708374409248
+ Train Stats: Loss: 0.0855 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6692 | top1:  81.5800 | top5:  97.3000
+ Test Stats: Loss: 0.6989 | top1:  80.7500 | top5:  97.2900
+Epoch: 76
+Current LR: 0.0023024503792480784
+ Train Stats: Loss: 0.0853 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6611 | top1:  81.9800 | top5:  97.3600
+ Test Stats: Loss: 0.6926 | top1:  80.8400 | top5:  97.3300
+Epoch: 77
+Current LR: 0.002148801169920035
+ Train Stats: Loss: 0.0834 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6526 | top1:  82.4000 | top5:  97.5200
+ Test Stats: Loss: 0.6852 | top1:  81.1700 | top5:  97.3900
+Epoch: 78
+Current LR: 0.0019963671296586837
+ Train Stats: Loss: 0.0805 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6487 | top1:  82.4600 | top5:  97.4000
+ Test Stats: Loss: 0.6798 | top1:  81.2200 | top5:  97.4600
+Epoch: 79
+Current LR: 0.0018457498459804593
+ Train Stats: Loss: 0.0803 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6398 | top1:  82.7600 | top5:  97.3200
+ Test Stats: Loss: 0.6748 | top1:  81.5900 | top5:  97.3800
+Epoch: 80
+Current LR: 0.0016975437364935451
+ Train Stats: Loss: 0.0806 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6314 | top1:  83.2400 | top5:  97.2800
+ Test Stats: Loss: 0.6656 | top1:  81.9600 | top5:  97.5700
+Epoch: 81
+Current LR: 0.0015523337030031435
+ Train Stats: Loss: 0.0860 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6070 | top1:  83.6400 | top5:  97.5400
+ Test Stats: Loss: 0.6393 | top1:  82.4700 | top5:  97.7000
+Epoch: 82
+Current LR: 0.0014106928231712968
+ Train Stats: Loss: 0.0809 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6080 | top1:  84.0800 | top5:  97.5200
+ Test Stats: Loss: 0.6384 | top1:  82.5900 | top5:  97.6100
+Epoch: 83
+Current LR: 0.0012731800888411383
+ Train Stats: Loss: 0.0786 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6097 | top1:  83.9600 | top5:  97.3400
+ Test Stats: Loss: 0.6387 | top1:  82.6700 | top5:  97.5500
+Epoch: 84
+Current LR: 0.0011403381999514795
+ Train Stats: Loss: 0.0794 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6087 | top1:  83.9600 | top5:  97.3800
+ Test Stats: Loss: 0.6373 | top1:  82.8600 | top5:  97.6700
+Epoch: 85
+Current LR: 0.0010126914227480757
+ Train Stats: Loss: 0.0769 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6056 | top1:  84.1000 | top5:  97.4400
+ Test Stats: Loss: 0.6319 | top1:  82.9100 | top5:  97.6400
+Epoch: 86
+Current LR: 0.0008907435207442865
+ Train Stats: Loss: 0.0761 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6092 | top1:  84.2000 | top5:  97.4000
+ Test Stats: Loss: 0.6309 | top1:  82.9600 | top5:  97.7800
+Epoch: 87
+Current LR: 0.0007749757665966243
+ Train Stats: Loss: 0.0757 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6199 | top1:  83.8800 | top5:  97.3000
+ Test Stats: Loss: 0.6451 | top1:  82.8500 | top5:  97.7100
+Epoch: 88
+Current LR: 0.0006658450427414512
+ Train Stats: Loss: 0.0752 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6223 | top1:  84.1000 | top5:  97.2600
+ Test Stats: Loss: 0.6480 | top1:  83.0600 | top5:  97.5000
+Epoch: 89
+Current LR: 0.0005637820382887426
+ Train Stats: Loss: 0.0713 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6155 | top1:  84.0400 | top5:  97.4000
+ Test Stats: Loss: 0.6399 | top1:  83.2900 | top5:  97.5700
+Epoch: 90
+Current LR: 0.000469189549288919
+ Train Stats: Loss: 0.0713 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6172 | top1:  83.9600 | top5:  97.4000
+ Test Stats: Loss: 0.6436 | top1:  83.4400 | top5:  97.4400
+Epoch: 91
+Current LR: 0.00038244088908086313
+ Train Stats: Loss: 0.0693 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6188 | top1:  83.8800 | top5:  97.5000
+ Test Stats: Loss: 0.6420 | top1:  83.3800 | top5:  97.5400
+Epoch: 92
+Current LR: 0.0003038784149947241
+ Train Stats: Loss: 0.0696 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6198 | top1:  83.7800 | top5:  97.3600
+ Test Stats: Loss: 0.6417 | top1:  83.4800 | top5:  97.4400
+Epoch: 93
+Current LR: 0.00023381217722394303
+ Train Stats: Loss: 0.0716 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6216 | top1:  83.9000 | top5:  97.4600
+ Test Stats: Loss: 0.6430 | top1:  83.3400 | top5:  97.3900
+Epoch: 94
+Current LR: 0.00017251869519877957
+ Train Stats: Loss: 0.0710 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6233 | top1:  83.9400 | top5:  97.5200
+ Test Stats: Loss: 0.6444 | top1:  83.4100 | top5:  97.4300
+Epoch: 95
+Current LR: 0.00012023986629045948
+ Train Stats: Loss: 0.0700 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6277 | top1:  83.9000 | top5:  97.5000
+ Test Stats: Loss: 0.6482 | top1:  83.3600 | top5:  97.3600
+Epoch: 96
+Current LR: 7.71820111527588e-05
+ Train Stats: Loss: 0.0697 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6296 | top1:  83.9200 | top5:  97.5400
+ Test Stats: Loss: 0.6496 | top1:  83.4200 | top5:  97.4000
+Epoch: 97
+Current LR: 4.351505946864212e-05
+ Train Stats: Loss: 0.0703 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6312 | top1:  83.7600 | top5:  97.5400
+ Test Stats: Loss: 0.6515 | top1:  83.4200 | top5:  97.3300
+Epoch: 98
+Current LR: 1.9371879315440873e-05
+ Train Stats: Loss: 0.0685 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6317 | top1:  83.8400 | top5:  97.5400
+ Test Stats: Loss: 0.6520 | top1:  83.4500 | top5:  97.3800
+Epoch: 99
+Current LR: 4.847752795248994e-06
+ Train Stats: Loss: 0.0683 | top1:  100.0000 | top5:  100.0000
+ Valid Stats: Loss: 0.6313 | top1:  83.8200 | top5:  97.5000
+ Test Stats: Loss: 0.6516 | top1:  83.4300 | top5:  97.3800
+
+Summary Results:
+======================
+ Best val acc:  84.2000 
+ Mean val acc:  83.8950 
+ Best test acc:  83.4800
+
+Execution finished at: 2021-01-11,05:25:07
