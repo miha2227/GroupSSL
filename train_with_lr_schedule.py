@@ -16,7 +16,7 @@ import os
 from group_loss.gtg import GTG
 from torch.optim import Adam
 from datetime import datetime
-from torch.optim.lr_scheduler import ReduceLROnPlateau, CyclicLR  #,OneCycleLR
+from torch.optim.lr_scheduler import ReduceLROnPlateau, CyclicLR, CosineAnnealingLR  #,OneCycleLR
 from tensorboardX import SummaryWriter
 from utils.pyt import OneCycleLR
 
@@ -80,7 +80,7 @@ def setup_models(use_cuda, n_classes):
     return model, ema_model
 
 
-def train_GroupSSL_with_LR_Schedule(args, logEnabled=True):  # Objective wrapper for Optuna to tune.
+def train_GroupSSL_with_LR_Schedule(args, logEnabled=True, isOptuna=False):  # Objective wrapper for Optuna to tune.
     timestamp = datetime.now()
 
     if args is None:  # args is not none when called from optuna, as hyper params come from optuna suggest
@@ -93,7 +93,7 @@ def train_GroupSSL_with_LR_Schedule(args, logEnabled=True):  # Objective wrapper
 
     model = create_model(use_cuda, n_classes)
     ema_model = create_model(use_cuda, n_classes, ema=True)
-    gtg = GTG(n_classes, max_iter=args.num_labeled_per_class, device=device).to(device)
+    gtg = GTG(n_classes, max_iter=args.max_iter_gtg, device=device).to(device)
 
     # region define criterion
     train_criterion = SemiLoss(args=args)
@@ -113,8 +113,10 @@ def train_GroupSSL_with_LR_Schedule(args, logEnabled=True):  # Objective wrapper
     # optim_schedular = OneCycleLR(optimizer, max_lr=0.01, epochs=args.epochs, steps_per_epoch=args.train_iteration, cycle_momentum=False)
     # optim_schedular = OneCycleLR(optimizer, max_lr=0.01, epochs=args.epochs, steps_per_epoch=args.train_iteration, final_div_factor=0.188638314328, cycle_momentum=False)
     # optim_schedular = OneCycleLR(optimizer, max_lr=0.01, epochs=args.epochs, steps_per_epoch=args.train_iteration, cycle_momentum=False)
-    optim_schedular = OneCycleLR(optimizer, max_lr=0.01, total_steps=int((args.epochs * args.train_iteration) * 0.75), final_div_factor=0.188638314328, cycle_momentum=False)
+    # optim_schedular = OneCycleLR(optimizer, max_lr=0.01, total_steps=int((args.epochs * args.train_iteration) * 0.75), final_div_factor=0.188638314328, cycle_momentum=False)
     # optim_schedular = CyclicLR(optimizer, base_lr=1e-3, max_lr=0.01, step_size_up=2048, mode='exp_range', gamma=0.98, cycle_momentum=False)  # 20 epochs, activate schedule after 10 epochs
+    optim_schedular = CosineAnnealingLR(optimizer, T_max=40960, eta_min=0.00001)
+    # optim_schedular = None
     # endregion
 
     # region logging setup
@@ -145,7 +147,8 @@ def train_GroupSSL_with_LR_Schedule(args, logEnabled=True):  # Objective wrapper
 
     for epoch in range(args.epochs):
         print('\nRunning epoch {} of {}:\n====================='.format(epoch+1, args.epochs))
-        print('Current LR: {}'.format(optimizer.param_groups[0]['lr']))
+        if optim_schedular:
+            print('Current LR: {}'.format(optimizer.param_groups[0]['lr']))
 
         train_loss, train_loss_x, train_loss_nll, train_loss_ce, train_loss_u = train(labeled_trainloader,
                                                                                       unlabeled_trainloader,
@@ -154,17 +157,18 @@ def train_GroupSSL_with_LR_Schedule(args, logEnabled=True):  # Objective wrapper
                                                                                       gtg, criterion_gl, criterion,
                                                                                       epoch, use_cuda, args=args,
                                                                                       lr_scheduler=optim_schedular,
-                                                                                      log_enabled=True,
-                                                                                      isCyclicLRScheduler=True)
+                                                                                      log_enabled=logEnabled,
+                                                                                      #isCyclicLRScheduler=True)
+                                                                                      isCyclicLRScheduler=False)
 
         # train accuracy
-        _, train_acc = validate(labeled_trainloader, ema_model, criterion, epoch, use_cuda, mode='Train Stats', args=args, log_enabled=True)
+        _, train_acc = validate(labeled_trainloader, ema_model, criterion, epoch, use_cuda, mode='Train Stats', args=args, log_enabled=logEnabled)
 
         # validation loss and accuracy
-        val_loss, val_acc = validate(val_loader, ema_model, criterion, epoch, use_cuda, mode='Valid Stats', args=args, log_enabled=True)
+        val_loss, val_acc = validate(val_loader, ema_model, criterion, epoch, use_cuda, mode='Valid Stats', args=args, log_enabled=logEnabled)
 
         # test loss and accuracy (TODO: ask doubt -> why do we need it? what are we doing with it?)
-        test_loss, test_acc = validate(test_loader, ema_model, criterion, epoch, use_cuda, mode='Test Stats', args=args, log_enabled=True)
+        test_loss, test_acc = validate(test_loader, ema_model, criterion, epoch, use_cuda, mode='Test Stats', args=args, log_enabled=logEnabled)
 
         # region record logs
         if logEnabled:
@@ -193,10 +197,14 @@ def train_GroupSSL_with_LR_Schedule(args, logEnabled=True):  # Objective wrapper
         test_accs.append(test_acc)
         val_accs.append(val_acc)
 
+        #if isOptuna:
+        #    yield best_acc, np.mean(val_accs[-20:]), best_t_acc
+
         #optim_schedular.step(val_loss)
 
         #optim_schedular.step()
-        ema_optimizer.set_LR(optimizer.param_groups[0]['lr'])
+        if optim_schedular and epoch+1 > 60:
+            ema_optimizer.set_LR(optimizer.param_groups[0]['lr'])
 
     # endregion
 

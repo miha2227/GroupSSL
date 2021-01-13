@@ -2,6 +2,7 @@ import torch.nn as nn
 import torch
 import group_loss.dynamics as dynamics
 import torch.nn.functional as F
+from numpy import ndarray
 
 
 class GTG(nn.Module):
@@ -45,6 +46,20 @@ class GTG(nn.Module):
         ps /= ps.sum(dim=ps.dim() - 1).unsqueeze(ps.dim() - 1)
         return ps
 
+    def _init_probs_prior_for_mixed_continuous_labels(self, probs, labs, L, U):
+        """
+            Initiallized probabilities from the softmax layer of the CNN with anchor labels as mixed labels from mixup
+            Note: 'labs' here is assumed to be of dimension nxm and contains actual mixed labels of the anchor points
+        """
+        n = len(L) + len(U)
+        ps = torch.zeros(n, self.m).to(self.device)
+        ps[L, :] = labs[L, :]  # actual mixed labels for the anchors
+        ps[U, :] = probs[U, :]  # predicted labels for the non anchors
+
+        # check if probs sum up to 1.
+        assert torch.allclose(ps.sum(dim=1), torch.ones(n).cuda())
+        return ps
+
     def set_negative_to_zero(self, W):
         return F.relu(W)
 
@@ -64,7 +79,10 @@ class GTG(nn.Module):
         else:
             if type(classes_to_use) is type(None):
                 ps = probs
-                ps = self._init_probs_prior(ps, labs, L, U)
+                if (type(labs) in [ndarray, torch.Tensor]) and labs.shape[1] > 1:
+                    ps = self._init_probs_prior_for_mixed_continuous_labels(ps, labs, L, U)
+                else:
+                    ps = self._init_probs_prior(ps, labs, L, U)
             else:
                 ps = probs
                 ps = self._init_probs_prior_only_classes(ps, labs, L, U, classes_to_use)

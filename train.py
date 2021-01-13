@@ -24,7 +24,21 @@ from utils import Logger, AverageMeter, accuracy, mkdir_p, savefig
 from tensorboardX import SummaryWriter
 
 from group_loss.gtg import GTG
-from utils.misc import get_labeled_and_unlabeled_points
+from utils.misc import get_labeled_and_unlabeled_points, get_labeled_and_unlabeled_points_random_order
+from utils.data_util import get_anchor_and_nonanchor_points_for_mixed_continuous_labels
+
+
+# define "soft" cross-entropy with pytorch tensor operations
+# taken from: https://discuss.pytorch.org/t/soft-cross-entropy-loss-tf-has-it-does-pytorch-have-it/69501/2
+def softXEnt(inputs, target):
+    logprobs = torch.nn.functional.log_softmax(inputs, dim=1)
+    return -(target * logprobs).sum() / inputs.shape[0]
+
+
+# define "soft" NLL with pytorch tensor operations
+# taken from: https://discuss.pytorch.org/t/loss-function-for-floating-targets/88847/3
+def softNLL(inputs, target):
+    return -(target * inputs).sum() / inputs.shape[0]
 
 
 def setup_random_seed(seed):
@@ -71,6 +85,7 @@ def args_setup():
                         help='Number of labeled samples per class for group loss')
     parser.add_argument('--T-softmax', type=float, default=10,
                         help='Softmax temperature for group loss')
+    parser.add_argument('--max_iter_gtg', type=int, default=2, help='Number of iterations for gtg replicator dynamics')
     # endregion
 
     # TODO: 1. implement random search for next hyper parameters:
@@ -257,10 +272,29 @@ def main(args, use_cuda):
     return best_acc, mean_val_acc, best_t_acc
 
 
+def calculate_unlabeled_loss_with_refinement_procedure(logits_u, embedings_u, gtg, target_u, loss_func='L2'):
+    """
+
+    :param logits_u: model 1st outputs, shape->(N*K)xC, where N = Batch Size, K = Number of augmentations for unlabeled, C = number of classes
+    :param embedings_u: model 2nd outputs, shape->?
+    :param gtg: GTG object instance
+    :param target_u: shape-> (N*K)xC, where N = Batch Size, K = Number of augmentations for unlabeled, C = number of classes
+    :param loss_func: string to choose loss function to be used. Default: L2. In future this would take a loss function object instead of a string (todo)
+    :return: Lu: unsupervised loss, shape-> 1 (scalar in tensor form)
+    """
+    # questions:
+    #   1. Do we at all need anchor and non-anchor points here?
+    #           1.1 How to get anchor and non anchor points?
+    #           1.2 how are the crisp integer labels obtained for the unlabeled? is it just a simple arg max of softmax probabilities?
+    #           1.3 Should we use hard or soft labels while initializing the probabilities for the anchors?
+    #   5. Are the operations done with torch.no_grad() and detach?
+    pass
+
+
 def train(labeled_trainloader, unlabeled_trainloader, model,
           optimizer, ema_optimizer, criterion,
           gtg, criterion_gl, loss_func,
-          epoch, use_cuda, args, lr_scheduler=None, log_enabled=True, isCyclicLRScheduler=False):
+          epoch, use_cuda, args, lr_scheduler=None, log_enabled=True, isCyclicLRScheduler=False, refine_unlabled_with_gtg=False):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
@@ -283,8 +317,8 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
 
     model.train()
     for batch_idx in range(args.train_iteration):
-        if lr_scheduler and batch_idx % 128 == 0:  # debug
-            print('LR from train method: {}'.format(optimizer.param_groups[0]['lr']))  # debug
+        #if lr_scheduler and batch_idx % 128 == 0:  # debug
+         #   print('LR from train method: {}'.format(optimizer.param_groups[0]['lr']))  # debug
         try:
             inputs_x, targets_int = labeled_train_iter.next()
         except:
@@ -338,21 +372,27 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
         mixed_input = list(torch.split(mixed_input, batch_size))
         mixed_input = interleave(mixed_input, batch_size)
 
-        model_out, model_embed = model(mixed_input[0])
+        model_out, model_embed = model(mixed_input[0])  # problem due to mixed model embedding is resolved
         logits = [model_out]
+        model_embed_list = [model_embed]
         for input in mixed_input[1:]:
-            model_out, _ = model(input)
-            logits.append(model_out)
+            model_out_2, model_embed_2 = model(input)
+            logits.append(model_out_2)
+            model_embed_list.append(model_embed_2)
 
         # put interleaved samples back
         logits = interleave(logits, batch_size)
+        model_embed_list = interleave(model_embed_list, batch_size)
+
         logits_x = logits[0]  # logits for labeled samples
+        model_embed_x = model_embed_list[0]  # model embeddings for labeled samples
+
         logits_u = torch.cat(logits[1:], dim=0)  # logits for unlabeled samples
 
         Lx, Lx_nll, Lx_ce, Lu, w = criterion(logits_x,
                                              mixed_target[:batch_size],
                                              targets_int,
-                                             model_embed,
+                                             model_embed_x,
                                              gtg,
                                              criterion_gl,
                                              loss_func,
@@ -380,7 +420,8 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
         batch_time.update(time.time() - end)
         end = time.time()
 
-        if lr_scheduler and isCyclicLRScheduler:  # learning rate scheduling (Use it after every batch only for Cyclic or OneCycle scheduler)
+        #if lr_scheduler and isCyclicLRScheduler:  # learning rate scheduling (Use it after every batch only for Cyclic or OneCycle scheduler)
+        if lr_scheduler and epoch+1 > 60:  # start decaying LR after 60 epoch
             lr_scheduler.step()
 
         # plot progress
@@ -511,9 +552,17 @@ class SemiLoss(object):
         :param epoch:
         :return:
         """
-        labs, L, U = get_labeled_and_unlabeled_points(orig_targets_x,
-                                                      num_points_per_class=self.args.num_labeled_per_class,
-                                                      num_classes=10)
+
+        _, L, U = get_labeled_and_unlabeled_points(orig_targets_x, num_points_per_class=self.args.num_labeled_per_class, num_classes=10)
+
+        # L, U = get_labeled_and_unlabeled_points_random_order(orig_targets_x, num_points_per_class=self.args.num_labeled_per_class, num_classes=10)
+        labs = torch.zeros_like(targets_x)
+        labs[L, :] = targets_x[L, :]
+
+        # labs, L, U = get_anchor_and_nonanchor_points_for_mixed_continuous_labels(
+        #             targets_x,
+        #             num_points_per_class=self.args.num_labeled_per_class,
+        #             num_classes=10)
 
         # compute normalized softmax
         probs_for_gtg = F.softmax(outputs_x / self.args.T_softmax, dim=1)
@@ -521,9 +570,11 @@ class SemiLoss(object):
         # do GTG (iterative process)
         probs_for_gtg, W = gtg(model_embeddings, model_embeddings.shape[0], labs, L, U, probs_for_gtg)
         probs_for_gtg = torch.log(probs_for_gtg + 1e-12)
-        orig_targets_x = orig_targets_x.cuda()
-        Lx_nll = criterion_gl(probs_for_gtg, orig_targets_x.long())
-        Lx_ce = loss_func(outputs_x, orig_targets_x.long())
+        # orig_targets_x = orig_targets_x.cuda()
+        # Lx_nll = criterion_gl(probs_for_gtg, orig_targets_x.long())
+        Lx_nll = softNLL(probs_for_gtg, targets_x)
+        # Lx_ce = loss_func(outputs_x, orig_targets_x.long())
+        Lx_ce = softXEnt(outputs_x, targets_x)
         Lx = Lx_nll + Lx_ce
         # Lx = -torch.mean(torch.sum(F.log_softmax(outputs_x, dim=1) * targets_x, dim=1))
 

@@ -77,6 +77,20 @@ def get_labeled_and_unlabeled_points(labels, num_points_per_class, num_classes=1
     return labs, L, U
 
 
+def get_labeled_and_unlabeled_points_random_order(labels, num_points_per_class, num_classes=100):
+    L, U = [], []
+    labs_buffer = np.zeros(num_classes)
+    num_points = labels.shape[0]
+    idx_list = [j for j in range(num_points)]
+    random.shuffle(idx_list)
+    for i in idx_list:
+        if labs_buffer[labels[i]] == num_points_per_class:
+            U.append(i)
+        else:
+            L.append(i)
+            labs_buffer[labels[i]] += 1
+    return L, U
+
 def setup_device():
     use_cuda = torch.cuda.is_available()
     if use_cuda:
