@@ -307,7 +307,7 @@ def calculate_unlabeled_loss_with_refinement_procedure(logits_u, embedings_u, gt
 def train(labeled_trainloader, unlabeled_trainloader, model,
           optimizer, ema_optimizer, criterion,
           gtg, criterion_gl, loss_func,
-          epoch, use_cuda, args, lr_scheduler=None, log_enabled=True, isCyclicLRScheduler=False, refine_unlabled_with_gtg=False):
+          epoch, use_cuda, args, n_classes=10, lr_scheduler=None, log_enabled=True, isCyclicLRScheduler=False, refine_unlabled_with_gtg=False):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
@@ -350,7 +350,7 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
         batch_size = inputs_x.size(0)
 
         # Transform label to one-hot
-        targets_x = torch.zeros(batch_size, 10).scatter_(1, targets_int.view(-1, 1).long(), 1)
+        targets_x = torch.zeros(batch_size, n_classes).scatter_(1, targets_int.view(-1, 1).long(), 1)
 
         if use_cuda:
             inputs_x, targets_x = inputs_x.cuda(), targets_x.cuda(non_blocking=True)
@@ -533,9 +533,10 @@ def linear_rampup(current, rampup_length):
 
 
 class SemiLoss(object):
-    def __init__(self, args):
+    def __init__(self, args, n_classes=10):
         super().__init__()
         self.args = args
+        self.n_classes = n_classes
 
     def __call__(self,
                  outputs_x,
@@ -566,7 +567,7 @@ class SemiLoss(object):
         :return:
         """
 
-        _, L, U = get_labeled_and_unlabeled_points(orig_targets_x, num_points_per_class=self.args.num_labeled_per_class, num_classes=10)
+        _, L, U = get_labeled_and_unlabeled_points(orig_targets_x, num_points_per_class=self.args.num_labeled_per_class, num_classes=self.n_classes)
 
         # L, U = get_labeled_and_unlabeled_points_random_order(orig_targets_x, num_points_per_class=self.args.num_labeled_per_class, num_classes=10)
         labs = torch.zeros_like(targets_x)
