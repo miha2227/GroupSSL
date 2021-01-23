@@ -77,6 +77,24 @@ def get_labeled_and_unlabeled_points(labels, num_points_per_class, num_classes=1
     return labs, L, U
 
 
+def get_anchor_and_nonanchor_points_for_unlabeled_data(initial_guessed_labels, num_points_per_class, num_classes=10, n_augment=2, batch_size=64):  # there is a duplicate of this method in data_util with name get_anchor_and_nonanchor_points
+    labs, L, U = [], [], []
+    num_points = initial_guessed_labels.shape[0]
+    assert num_points == batch_size * n_augment, 'total number of points is not matching with batch size times number of augmentations'
+    for j in range(n_augment):
+        start = j * batch_size
+        stop = start + batch_size
+        labs_buffer = np.zeros(num_classes)
+        for i in range(start, stop):
+            if labs_buffer[initial_guessed_labels[i]] == num_points_per_class:
+                U.append(i)
+            else:
+                L.append(i)
+                labs.append(initial_guessed_labels[i])
+                labs_buffer[initial_guessed_labels[i]] += 1
+    return labs, L, U
+
+
 def get_labeled_and_unlabeled_points_random_order(labels, num_points_per_class, num_classes=100):
     L, U = [], []
     labs_buffer = np.zeros(num_classes)

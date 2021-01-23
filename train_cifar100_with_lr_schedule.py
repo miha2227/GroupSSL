@@ -116,7 +116,7 @@ def train_GroupSSL_with_LR_Schedule(args, logEnabled=True, isOptuna=False):  # O
     # optim_schedular = OneCycleLR(optimizer, max_lr=0.01, total_steps=int((args.epochs * args.train_iteration) * 0.75), final_div_factor=0.188638314328, cycle_momentum=False)
     # optim_schedular = CyclicLR(optimizer, base_lr=1e-3, max_lr=0.01, step_size_up=2048, mode='exp_range', gamma=0.98, cycle_momentum=False)  # 20 epochs, activate schedule after 10 epochs
     optim_schedular = CosineAnnealingLR(optimizer, T_max=40960, eta_min=0.00001)
-    #optim_schedular = None
+    # optim_schedular = None
     # endregion
 
     # region logging setup
@@ -237,7 +237,7 @@ def train_GroupSSL_with_LR_Schedule(args, logEnabled=True, isOptuna=False):  # O
 
 if __name__ == '__main__':
     args = args_setup()
-    best_acc, mean_val_acc, best_t_acc = train_GroupSSL_with_LR_Schedule(args, logEnabled=False)
+    best_acc, mean_val_acc, best_t_acc = train_GroupSSL_with_LR_Schedule(args, logEnabled=True)
     print('\nBest validation accuracy: {}'.format(best_acc))
     print('\nAverage validation accuracy: {}'.format(mean_val_acc))
     print('\n\nBest test accuracy: {}'.format(best_t_acc))

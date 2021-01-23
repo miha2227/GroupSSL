@@ -24,7 +24,7 @@ from utils import Logger, AverageMeter, accuracy, mkdir_p, savefig
 from tensorboardX import SummaryWriter
 
 from group_loss.gtg import GTG
-from utils.misc import get_labeled_and_unlabeled_points, get_labeled_and_unlabeled_points_random_order
+from utils.misc import get_labeled_and_unlabeled_points, get_labeled_and_unlabeled_points_random_order, get_anchor_and_nonanchor_points_for_unlabeled_data
 from utils.data_util import get_anchor_and_nonanchor_points_for_mixed_continuous_labels
 
 
@@ -92,6 +92,7 @@ def args_setup():
     parser.add_argument('--lambda-u', default=75, type=float)
     parser.add_argument('--T', default=0.5, type=float)
     parser.add_argument('--ema-decay', default=0.999, type=float)
+    parser.add_argument('--ema_label_guess', type=bool, default=False, help='Whether to use ema model for label guessing')
 
     # Group Loss options
     parser.add_argument('--num-labeled-per-class', type=int, default=2,
@@ -99,6 +100,8 @@ def args_setup():
     parser.add_argument('--T-softmax', type=float, default=10,
                         help='Softmax temperature for group loss')
     parser.add_argument('--max_iter_gtg', type=int, default=2, help='Number of iterations for gtg replicator dynamics')
+    parser.add_argument('--lg_threshold', type=float, default=None, help='Prediction probability threshold to activate refinement procedure for unlabeled images')
+    parser.add_argument('--urf_mode', type=str, default='fixed_threshold', help='mode of triggering refinement procedure for unlabeled image')
     # endregion
 
     # TODO: 1. implement random search for next hyper parameters:
@@ -304,10 +307,26 @@ def calculate_unlabeled_loss_with_refinement_procedure(logits_u, embedings_u, gt
     pass
 
 
+def should_trigger_refinement_for_unlabeled(probs, mode='fixed_threshold', threshold=0.5, nstd=2):
+    res = False
+    if mode == 'fixed_threshold':
+        res = bool(torch.all(torch.max(probs, dim=1).values > threshold))
+    elif mode == 'avg_std':
+        avg = torch.mean(probs, dim=1)
+        std = torch.std(probs, dim=1)
+        res = bool(torch.all(torch.max(probs, dim=1).values > avg + (nstd * std)))  # todo: think more about the std limit
+    elif mode == 'entropy':
+        res = bool(torch.all(torch.sum(-1 * probs * torch.log2(probs+1e-12), dim=1) < threshold))  # choose threshold carefully as threshold means entropy threshold here, example value 1.7
+    else:
+        assert False, 'mode not supported'
+    return res
+
+
+
 def train(labeled_trainloader, unlabeled_trainloader, model,
           optimizer, ema_optimizer, criterion,
           gtg, criterion_gl, loss_func,
-          epoch, use_cuda, args, n_classes=10, lr_scheduler=None, log_enabled=True, isCyclicLRScheduler=False, refine_unlabled_with_gtg=False):
+          epoch, use_cuda, args, n_classes=10, lr_scheduler=None, log_enabled=True, isCyclicLRScheduler=False, refine_unlabled_with_gtg=False, ema_model=None):
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
@@ -327,7 +346,6 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
             f.write('\nEpoch: {}'.format(epoch))
             if lr_scheduler:
                 f.write('\nCurrent LR: {}'.format(optimizer.param_groups[0]['lr']))
-
     model.train()
     for batch_idx in range(args.train_iteration):
         #if lr_scheduler and batch_idx % 128 == 0:  # debug
@@ -359,9 +377,36 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
 
         with torch.no_grad():
             # compute guessed labels of unlabeled samples
-            outputs_u, _ = model(inputs_u)
-            outputs_u2, _ = model(inputs_u2)
-            p = (torch.softmax(outputs_u, dim=1) + torch.softmax(outputs_u2, dim=1)) / 2
+            if args.ema_label_guess and ema_model is not None:
+                outputs_u, embedings_u = ema_model(inputs_u)
+                outputs_u2, embedings_u2 = ema_model(inputs_u2)
+            else:
+                outputs_u, embedings_u = model(inputs_u)
+                outputs_u2, embedings_u2 = model(inputs_u2)
+
+            if args.lg_threshold is not None:  # when replicator dynamics is enabled for non labled
+                #p1 = torch.softmax(outputs_u/args.T_softmax, dim=1)  # todo: doubt if the args.T_softmax division required? lg_threshold>0.1
+                #p2 = torch.softmax(outputs_u2/args.T_softmax, dim=1)  # todo: doubt if torch.softmax or F.softmax?
+
+                p1 = torch.softmax(outputs_u, dim=1)  # todo: doubt if the args.T_softmax division required? lg_threshold>0.5
+                p2 = torch.softmax(outputs_u2, dim=1)  # todo: doubt if torch.softmax or F.softmax?
+
+                p1_p2 = torch.cat([p1, p2], dim=0)
+                #if bool(torch.all(torch.max(p1_p2, dim=1).values > args.lg_threshold)):
+                if should_trigger_refinement_for_unlabeled(p1_p2, args.urf_mode, args.lg_threshold):
+                    print('Refinement is applied for unlabeled data')  # debug
+                    initial_guessed_labels = torch.argmax(p1_p2, dim=1)
+                    # get anchors and non anchors
+                    labs, anchors, non_anchors = get_anchor_and_nonanchor_points_for_unlabeled_data(initial_guessed_labels, args.num_labeled_per_class, p1_p2.shape[1], 2, args.batch_size)  # todo: replace 2 with args.K later on
+                    # gtg
+                    p1_p2, W = gtg(torch.cat([embedings_u, embedings_u2], dim=0), p1_p2.shape[0], labs, anchors, non_anchors, p1_p2)
+                    # calculate ingredients for p
+                    p1, p2 = torch.split(p1_p2, args.batch_size, dim=0)
+                # calculate p
+                p = (p1 + p2) / 2
+            else:  # when replicator dynamics is not enabled for non labled
+                p = (torch.softmax(outputs_u, dim=1) + torch.softmax(outputs_u2, dim=1)) / 2
+
             pt = p ** (1 / args.T)
             targets_u = pt / pt.sum(dim=1, keepdim=True)
             targets_u = targets_u.detach()  # check how they look like
