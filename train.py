@@ -102,6 +102,7 @@ def args_setup():
     parser.add_argument('--max_iter_gtg', type=int, default=2, help='Number of iterations for gtg replicator dynamics')
     parser.add_argument('--lg_threshold', type=float, default=None, help='Prediction probability threshold to activate refinement procedure for unlabeled images')
     parser.add_argument('--urf_mode', type=str, default='fixed_threshold', help='mode of triggering refinement procedure for unlabeled image')
+    parser.add_argument('--urf_n_points', type=str, default='all_points', help='whether to consider all or some points to check threshold for activating refinement for unlabeled samples')
     # endregion
 
     # TODO: 1. implement random search for next hyper parameters:
@@ -307,7 +308,7 @@ def calculate_unlabeled_loss_with_refinement_procedure(logits_u, embedings_u, gt
     pass
 
 
-def should_trigger_refinement_for_unlabeled(probs, mode='fixed_threshold', threshold=0.5, nstd=2):
+def should_trigger_refinement_for_unlabeled_all_points(probs, mode='fixed_threshold', threshold=0.5, nstd=2):
     res = False
     if mode == 'fixed_threshold':
         res = bool(torch.all(torch.max(probs, dim=1).values > threshold))
@@ -321,6 +322,23 @@ def should_trigger_refinement_for_unlabeled(probs, mode='fixed_threshold', thres
         assert False, 'mode not supported'
     return res
 
+
+def should_trigger_refinement_for_unlabeled_some_points(probs, number_of_points_to_consider=60, mode='fixed_threshold', threshold=0.5, nstd=2):
+    res = False
+    confidence_marker = None
+    if mode == 'fixed_threshold':
+        confidence_marker = torch.max(probs, dim=1).values > threshold
+    elif mode == 'avg_std':
+        avg = torch.mean(probs, dim=1)
+        std = torch.std(probs, dim=1)
+        confidence_marker = torch.max(probs, dim=1).values > (avg + (nstd * std))  # todo: think more about the std limit
+    elif mode == 'entropy':
+        confidence_marker = torch.sum(-1 * probs * torch.log2(probs+1e-12), dim=1) < threshold  # choose threshold carefully as threshold means entropy threshold here, example value 1.7
+    else:
+        assert False, 'mode not supported'
+    if confidence_marker.count_nonzero() >= number_of_points_to_consider:
+        res = True
+    return res, confidence_marker
 
 
 def train(labeled_trainloader, unlabeled_trainloader, model,
@@ -392,12 +410,18 @@ def train(labeled_trainloader, unlabeled_trainloader, model,
                 p2 = torch.softmax(outputs_u2, dim=1)  # todo: doubt if torch.softmax or F.softmax?
 
                 p1_p2 = torch.cat([p1, p2], dim=0)
-                #if bool(torch.all(torch.max(p1_p2, dim=1).values > args.lg_threshold)):
-                if should_trigger_refinement_for_unlabeled(p1_p2, args.urf_mode, args.lg_threshold):
+
+                if args.urf_n_points == 'all_points':
+                    trigger_refinement = should_trigger_refinement_for_unlabeled_all_points(p1_p2, args.urf_mode, args.lg_threshold)
+                    confidence_marker = None
+                elif args.urf_n_points == 'some_points':
+                    trigger_refinement, confidence_marker = should_trigger_refinement_for_unlabeled_some_points(p1_p2, p1_p2.shape[1]*args.num_labeled_per_class*2, args.urf_mode, args.lg_threshold)  # todo: replace 2 with args.K later on
+                # if bool(torch.all(torch.max(p1_p2, dim=1).values > args.lg_threshold)):
+                if trigger_refinement:
                     print('Refinement is applied for unlabeled data')  # debug
                     initial_guessed_labels = torch.argmax(p1_p2, dim=1)
                     # get anchors and non anchors
-                    labs, anchors, non_anchors = get_anchor_and_nonanchor_points_for_unlabeled_data(initial_guessed_labels, args.num_labeled_per_class, p1_p2.shape[1], 2, args.batch_size)  # todo: replace 2 with args.K later on
+                    labs, anchors, non_anchors = get_anchor_and_nonanchor_points_for_unlabeled_data(initial_guessed_labels, args.num_labeled_per_class, p1_p2.shape[1], 2, args.batch_size, confidence_marker)  # todo: replace 2 with args.K later on
                     # gtg
                     p1_p2, W = gtg(torch.cat([embedings_u, embedings_u2], dim=0), p1_p2.shape[0], labs, anchors, non_anchors, p1_p2)
                     # calculate ingredients for p

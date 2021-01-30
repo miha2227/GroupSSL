@@ -77,7 +77,10 @@ def get_labeled_and_unlabeled_points(labels, num_points_per_class, num_classes=1
     return labs, L, U
 
 
-def get_anchor_and_nonanchor_points_for_unlabeled_data(initial_guessed_labels, num_points_per_class, num_classes=10, n_augment=2, batch_size=64):  # there is a duplicate of this method in data_util with name get_anchor_and_nonanchor_points
+def get_anchor_and_nonanchor_points_for_unlabeled_data(initial_guessed_labels, num_points_per_class, num_classes=10, n_augment=2, batch_size=64, confidence_marker=None):  # there is a duplicate of this method in data_util with name get_anchor_and_nonanchor_points
+    """
+        confidence_marker is assumed to be a tensor of booleans with length same as num_points
+    """
     labs, L, U = [], [], []
     num_points = initial_guessed_labels.shape[0]
     assert num_points == batch_size * n_augment, 'total number of points is not matching with batch size times number of augmentations'
@@ -85,13 +88,23 @@ def get_anchor_and_nonanchor_points_for_unlabeled_data(initial_guessed_labels, n
         start = j * batch_size
         stop = start + batch_size
         labs_buffer = np.zeros(num_classes)
-        for i in range(start, stop):
-            if labs_buffer[initial_guessed_labels[i]] == num_points_per_class:
-                U.append(i)
-            else:
-                L.append(i)
-                labs.append(initial_guessed_labels[i])
-                labs_buffer[initial_guessed_labels[i]] += 1
+        if confidence_marker is None:
+            for i in range(start, stop):
+                if labs_buffer[initial_guessed_labels[i]] == num_points_per_class:
+                    U.append(i)
+                else:
+                    L.append(i)
+                    labs.append(initial_guessed_labels[i])
+                    labs_buffer[initial_guessed_labels[i]] += 1
+        else:  # while triggering this part, make sure number of Trues in confidence_marker list is at least num_points_per_class * num_classes * n_augment
+            assert num_points_per_class * num_classes * n_augment <= confidence_marker.count_nonzero(), 'make sure number of Trues in confidence_marker list is at least num_points_per_class * num_classes * n_augment'
+            for i in range(start, stop):
+                if (labs_buffer[initial_guessed_labels[i]] == num_points_per_class) or (bool(confidence_marker[i]) is False):
+                    U.append(i)
+                else:
+                    L.append(i)
+                    labs.append(initial_guessed_labels[i])
+                    labs_buffer[initial_guessed_labels[i]] += 1
     return labs, L, U
 
 
